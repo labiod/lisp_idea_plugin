@@ -1,0 +1,31 @@
+{
+    parserClass="com.kgb.lisp.parser.LispParser"
+//    parserUtilClass="com.kgb.lisp.parser.LispParserUtil"
+
+    psiClassPrefix="Lisp"
+    psiImplClassSuffix="Impl"
+    psiPackage="com.kgb.lisp.psi"
+    psiImplPackage="com.kgb.lisp.psi.impl"
+    psiImplUtilClass="com.kgb.lisp.psi.impl.LispPsiImplUtil"
+
+    elementTypeHolderClass="com.kgb.lisp.psi.LispTypes"
+    elementTypeClass="com.kgb.lisp.psi.LispElementType"
+    tokenTypeClass="com.kgb.lisp.psi.LispElementType"
+
+    tokens = [
+        LEFT_PAREN="("
+        RIGHT_PAREN=")"
+        SEPARATOR=":"
+        KEYWORD="def"
+        ATTRIBUTE="regexp:[\w_\d]+"
+        WHITE_SPACE=" "
+        string = 'regexp:"([^"\\]|\\.)*"'
+        integer = "regexp:\p{Digit}+"
+    ]
+}
+
+lispFile ::= item_*
+
+private item_ ::= (property|COMMENT|CRLF)
+
+property ::= (KEYWORD (string | integer)* )
