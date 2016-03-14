@@ -1,64 +1,56 @@
 package com.kgb.lisp.lexer;
-
-import com.intellij.lexer.FlexLexer;
+import com.intellij.lexer.*;
 import com.intellij.psi.tree.IElementType;
-import com.kgb.lisp.psi.LispTypes;
-import com.intellij.psi.TokenType;
+import static com.kgb.lisp.psi.LispTypes.*;
 
 %%
 
+%{
+  public LispLexer() {
+    this((java.io.Reader)null);
+  }
+%}
+
+%public
 %class LispLexer
 %implements FlexLexer
-%unicode
 %function advance
 %type IElementType
-%eof{
-    return;
-%eof}
+%unicode
 
-CRLF= \n|\r|\r\n
-WHITE_SPACE=[\ \t\f]
-END_OF_LINE_COMMENT=("#"|"!")[^\r\n]*
-SEPARATOR=[:]
-LEFT_PAREN="("
-RIGHT_PAREN=")"
-ATTRIBUTE="regexp:[\w_\d]+"
-WHITE_SPACE=" "
-string = \"(test)\"
-INTEGER = [123]
+EOL="\r"|"\n"|"\r\n"
+LINE_WS=[\ \t\f]
+WHITE_SPACE=({LINE_WS}|{EOL})+
 
-KEYWORD_CHARACTER="def"|"defun"
-//KEY_CHARACTER=[^:=\ \n\r\t\f\\] | "\\ "
-
-%state WAITING_VALUE
-
+SPACE=[\s\n\t\r]+
+COMMENT="//".*
+NUMBER=[0-9]+(\.[0-9]*)?
+STRING=('([^'\\]|\\.)*'|\"([^\"\\]|\\.)*\")
+KEYWORD=(do)|(loop)|(in)|(for)|(let)
+PROPERTY_NAME=[a-zA-Z][a-zA-Z_\-0-9]*
 
 %%
+<YYINITIAL> {
+  {WHITE_SPACE}        { return com.intellij.psi.TokenType.WHITE_SPACE; }
 
-<YYINITIAL> {END_OF_LINE_COMMENT}                           { yybegin(YYINITIAL); return LispTypes.COMMENT; }
+  ";"                  { return SEMI; }
+  "="                  { return EQ; }
+  "("                  { return LP; }
+  ")"                  { return RP; }
+  "+"                  { return OP_1; }
+  "-"                  { return OP_2; }
+  "*"                  { return OP_3; }
+  "/"                  { return OP_4; }
+  "!"                  { return OP_5; }
+  "defun"              { return DEFUN; }
+  "let"                { return LET; }
 
-<YYINITIAL> {KEYWORD_CHARACTER}                             { yybegin(YYINITIAL); return LispTypes.KEYWORD; }
+  {SPACE}              { return SPACE; }
+  {COMMENT}            { return COMMENT; }
+  {NUMBER}             { return NUMBER; }
+  {STRING}             { return STRING; }
+  {KEYWORD}            { return KEYWORD; }
+  {PROPERTY_NAME}      { return PROPERTY_NAME; }
 
-//<YYINITIAL> {KEY_CHARACTER}+                                { yybegin(YYINITIAL); return LispTypes.KEY; }
-
-<YYINITIAL> {SEPARATOR}                                     { yybegin(WAITING_VALUE); return LispTypes.SEPARATOR; }
-
-//<YYINITIAL> {LEFT_PAREN}                                     { yybegin(WAITING_VALUE); return LispTypes.LEFT_PAREN; }
-
-//<YYINITIAL> {RIGHT_PAREN}                                     { yybegin(WAITING_VALUE); return LispTypes.RIGHT_PAREN; }
-
-<WAITING_VALUE> {ATTRIBUTE}                                { yybegin(YYINITIAL); return LispTypes.ATTRIBUTE; }
-
-<WAITING_VALUE> {string}                                { yybegin(YYINITIAL); return LispTypes.STRING; }
-
-<WAITING_VALUE> {INTEGER}+                               { yybegin(YYINITIAL); return LispTypes.INTEGER; }
-
-<WAITING_VALUE> {CRLF}({CRLF}|{WHITE_SPACE})+               { yybegin(YYINITIAL); return TokenType.WHITE_SPACE; }
-
-<WAITING_VALUE> {WHITE_SPACE}+                              { yybegin(WAITING_VALUE); return TokenType.WHITE_SPACE; }
-
-({CRLF}|{WHITE_SPACE})+                                     { yybegin(YYINITIAL); return TokenType.WHITE_SPACE; }
-
-{WHITE_SPACE}+                                              { yybegin(YYINITIAL); return TokenType.WHITE_SPACE; }
-
-.                                                           { return TokenType.BAD_CHARACTER; }
+  [^] { return com.intellij.psi.TokenType.BAD_CHARACTER; }
+}

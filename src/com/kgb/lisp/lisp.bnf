@@ -12,20 +12,54 @@
     elementTypeClass="com.kgb.lisp.psi.LispElementType"
     tokenTypeClass="com.kgb.lisp.psi.LispElementType"
 
-    tokens = [
-        LEFT_PAREN="("
-        RIGHT_PAREN=")"
-        SEPARATOR=":"
-        KEYWORD="def"
-        ATTRIBUTE="regexp:[\w_\d]+"
-        WHITE_SPACE=" "
-        string = 'regexp:"([^"\\]|\\.)*"'
-        integer = "regexp:\p{Digit}+"
-    ]
+    tokens=[
+        SEMI=';'
+        EQ='='
+        LP='('
+        RP=')'
+
+        space='regexp:[\s\n\t\r]+'
+        comment='regexp://.*'
+        number='regexp:\d+(\.\d*)?'
+        string="regexp:('([^'\\]|\\.)*'|\"([^\"\\]|\\.)*\")"
+
+        op_1='+'
+        op_2='-'
+        op_3='*'
+        op_4='/'
+        op_5='!'
+        KEYWORD="regexp:(do)|(loop)|(in)|(for)|(let)"
+        DEFUN="defun"
+        LET="let"
+        PROPERTY_NAME="regexp:[a-zA-Z][a-zA-Z_\-0-9]*"
+      ]
 }
 
-lispFile ::= item_*
+root ::= root_item *
 
-private item_ ::= (property|COMMENT|CRLF)
+private root_item ::= LP SPACE* expr SPACE* RP {pin=1 recoverWhile=item_recovery}
 
-property ::= (KEYWORD (string | integer)* )
+private expr ::= (defun_item) | (call_expr) | (property)
+
+private defun_item ::= DEFUN SPACE* PROPERTY_NAME SPACE* args SPACE* method_body
+
+private property ::= LET SPACE* LP LP SPACE* property_def SPACE* RP RP SPACE* form_def*
+
+private property_def ::= PROPERTY_NAME SPACE* property_value
+
+private form_def ::= LP SPACE* expr* SPACE* RP
+
+private property_value ::= (number)|(string)
+
+private method_body ::= LP SPACE* expr SPACE* RP
+
+private call_expr ::= (KEYWORD SPACE* sub_expr) | (PROPERTY_NAME SPACE* sub_expr*) | (LP SPACE* call_expr SPACE* RP) | (PROPERTY_NAME SPACE* PROPERTY_NAME*)
+
+private sub_expr ::= (LP SPACE* expr SPACE* RP) | (LP SPACE* PROPERTY_NAME args* SPACE* RP) | (PROPERTY_NAME args*)
+
+private args ::= (LP SPACE* PROPERTY_NAME * SPACE* RP) | (PROPERTY_NAME *)
+
+private item_recovery ::= !(RP)
+
+
+

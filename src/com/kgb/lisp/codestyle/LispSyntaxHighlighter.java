@@ -21,8 +21,8 @@ public class LispSyntaxHighlighter extends SyntaxHighlighterBase {
     private static final TextAttributesKey SEPARATOR = createTextAttributesKey("LISP_SEPARATOR", DefaultLanguageHighlighterColors.OPERATION_SIGN);
     private static final TextAttributesKey KEYWORD = createTextAttributesKey("LISP_KEYWORD", DefaultLanguageHighlighterColors.KEYWORD);
     private static final TextAttributesKey KEY = createTextAttributesKey("LISP_KEY", DefaultLanguageHighlighterColors.KEYWORD);
-    private static final TextAttributesKey FUNCTION_NAME = createTextAttributesKey("LISP_FUNCTION_NAME", DefaultLanguageHighlighterColors.FUNCTION_CALL);
-    private static final TextAttributesKey ATTRIBUTE = createTextAttributesKey("LISP_ATTRIBUTE", DefaultLanguageHighlighterColors.MARKUP_ATTRIBUTE);
+    private static final TextAttributesKey FUNCTION_NAME = createTextAttributesKey("LISP_FUNCTION_NAME", DefaultLanguageHighlighterColors.CONSTANT);
+    private static final TextAttributesKey ATTRIBUTE = createTextAttributesKey("LISP_ATTRIBUTE", DefaultLanguageHighlighterColors.CONSTANT);
     private static final TextAttributesKey STRING = createTextAttributesKey("LISP_STRING", DefaultLanguageHighlighterColors.STRING);
     private static final TextAttributesKey INTEGER = createTextAttributesKey("LISP_INTEGER", DefaultLanguageHighlighterColors.NUMBER);
     private static final TextAttributesKey COMMENT = createTextAttributesKey("LISP_COMMENT", DefaultLanguageHighlighterColors.LINE_COMMENT);
@@ -49,20 +49,18 @@ public class LispSyntaxHighlighter extends SyntaxHighlighterBase {
     @NotNull
     @Override
     public TextAttributesKey[] getTokenHighlights(IElementType tokenType) {
-        if(tokenType.equals(LispTypes.SEPARATOR)) {
+        if(tokenType.equals(LispTypes.EQ)) {
             return SEPARATOR_KEYS;
-        } else if(tokenType.equals(LispTypes.KEYWORD)) {
+        } else if(tokenType.equals(LispTypes.KEYWORD) || tokenType.equals(LispTypes.DEFUN)
+                || tokenType.equals(LispTypes.LET)) {
             return KEY_KEYS;
-        } else if(tokenType.equals(LispTypes.ATTRIBUTE)) {
-            return ATTRIBUTES_KEYS;
-        }
-        else if(tokenType.equals(LispTypes.COMMENT)) {
+        } else if(tokenType.equals(LispTypes.COMMENT)) {
             return COMMENT_KEYS;
         } else if(tokenType.equals(TokenType.BAD_CHARACTER)) {
             return BAD_CHARACTER_KEYS;
         } else if(tokenType.equals(LispTypes.STRING)) {
             return STRING_KEYS;
-        } else if(tokenType.equals(LispTypes.INTEGER)) {
+        } else if(tokenType.equals(LispTypes.NUMBER)) {
             return INTEGER_KEYS;
         } else {
             return EMPTY_KEYS;
