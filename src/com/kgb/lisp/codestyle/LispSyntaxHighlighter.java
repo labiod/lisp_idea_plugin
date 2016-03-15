@@ -56,6 +56,7 @@ public class LispSyntaxHighlighter extends SyntaxHighlighterBase {
                 || tokenType.equals(LispTypes.FOR) || tokenType.equals(LispTypes.IN)
                 || tokenType.equals(LispTypes.DO)  || tokenType.equals(LispTypes.FROM)
                 || tokenType.equals(LispTypes.TO)  || tokenType.equals(LispTypes.COLLECT)
+                || tokenType.equals(LispTypes.CAR)  || tokenType.equals(LispTypes.CDR)
                 || tokenType.equals(LispTypes.OP_1)  || tokenType.equals(LispTypes.OP_2)
                 || tokenType.equals(LispTypes.OP_3)  || tokenType.equals(LispTypes.OP_4)
                 || tokenType.equals(LispTypes.OP_5)  || tokenType.equals(LispTypes.OP_6)
@@ -72,7 +73,9 @@ public class LispSyntaxHighlighter extends SyntaxHighlighterBase {
             return INTEGER_KEYS;
         } else if(tokenType.equals(LispTypes.FUNC_NAME)) {
             return FUNCTION_NAME_KEYS;
-        } else if(tokenType.equals(LispTypes.NULL)) {
+        } else if(tokenType.equals(LispTypes.NULL)
+                || tokenType.equals(LispTypes.TRUE) || tokenType.equals(LispTypes.FALSE)
+                ) {
             return ATTRIBUTES_KEYS;
         } else {
             return EMPTY_KEYS;

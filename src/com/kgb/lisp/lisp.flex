@@ -32,7 +32,7 @@ PF_NAME=[a-zA-Z][a-zA-Z_\-0-9]*
 <YYINITIAL> {
   {WHITE_SPACE}             { return com.intellij.psi.TokenType.WHITE_SPACE; }
 
-  ";"                       { return SEMI; }
+  ";"                       { return COMMENT; }
   "="                       { return EQ; }
   "("                       { return LP; }
   ")"                       { return RP; }
@@ -43,7 +43,7 @@ PF_NAME=[a-zA-Z][a-zA-Z_\-0-9]*
   "!"                       { return OP_5; }
   ">"                       { return OP_6; }
   "<"                       { return OP_7; }
-  "'"                       { return QUICK_LIST; }
+  "'"                       { return QV; }
   "REGEXP:(car)|(cdr)"      { return KEYWORD; }
   "loop"                    { return LOOP; }
   "for"                     { return FOR; }
@@ -57,6 +57,10 @@ PF_NAME=[a-zA-Z][a-zA-Z_\-0-9]*
   "null"                    { return IF_NULL; }
   "nil"                     { return NULL; }
   "if"                      { return IF; }
+  "car"                     { return CAR; }
+  "cdr"                     { return CDR; }
+  "true"                    { return TRUE; }
+  "false"                   { return FALSE; }
 
   {SPACE}                   { return SPACE; }
   {COMMENT}                 { return COMMENT; }
