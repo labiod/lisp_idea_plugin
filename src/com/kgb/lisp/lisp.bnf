@@ -17,24 +17,38 @@
         EQ='='
         LP='('
         RP=')'
+        COMMENT=";"
+
 
         space='regexp:[\s\t]+'
         comment='regexp://.*'
         number='regexp:\d+(\.\d*)?'
-        string="regexp:('([^'\\]|\\.)*'|\"([^\"\\]|\\.)*\")"
+        string="regexp:(\"([^\"\\]|\\.)*\")"
 
         op_1='+'
         op_2='-'
         op_3='*'
         op_4='/'
         op_5='!'
-        PF_NAME="regexp:[a-zA-Z][a-zA-Z_\-0-9]*"
-        KEYWORD="regexp:(do)|(loop)|(in)|(for)"
+        op_6='>'
+        op_7='<'
+        //keywords block
+        QUICK_LIST="'"
+        KEYWORD="REGEXP:(car)|(cdr)"
+        LOOP="loop"
+        FOR="for"
+        IN="in"
+        FROM="from"
+        TO="to"
+        DO="do"
+        COLLECT="collect"
         DEFUN="defun"
         LET="let"
         IF_NULL="null"
         NULL="nil"
         IF="if"
+        //keywords block end
+        PF_NAME="regexp:[a-zA-Z][a-zA-Z_\-0-9]*"
       ]
 }
 
@@ -42,29 +56,47 @@ root ::= root_item *
 
 private root_item ::= !<<eof>> block_body
 
-private block_body ::= let_def | def_fun_item | call_func | if_statement | empty_block
+private block_body ::= let_def | def_fun_item | call_func | if_statement | empty_block | loop_block
 
 empty_block ::= LP SPACE* RP
 
-def_fun_item ::= LP SPACE * DEFUN SPACE* PF_NAME SPACE* LP SPACE* def_func_args* SPACE* RP SPACE* block_body SPACE* RP
+def_fun_item ::= LP SPACE* DEFUN SPACE* PF_NAME SPACE* LP SPACE* def_func_args* SPACE* RP SPACE* block_body SPACE* RP
 
 call_func ::= LP SPACE* func_name SPACE* call_func_args* SPACE* RP
 
 let_def ::= LP SPACE* LET SPACE* LP SPACE* property_def* SPACE* RP SPACE* block_body SPACE* RP
 
-if_statement ::= LP SPACE* IF SPACE* if_condition SPACE* if_block SPACE* else_block SPACE* RP
+if_statement ::= LP SPACE* IF SPACE* if_condition SPACE* if_block? SPACE* else_block? SPACE* RP
 
 func_name ::= PF_NAME
 
-def_func_args ::= ('regexp:[a-zA-Z][a-zA-Z_\-0-9]*')
+def_func_args ::= PF_NAME
+
+loop_block ::= LP SPACE* LOOP SPACE* FOR SPACE* PF_NAME SPACE* from_in_block+ SPACE* SPACE* do_block* SPACE* collect_block* SPACE* RP
+
+operation_call ::= LP SPACE* (OP_1 | OP_2 | OP_3 | OP_4 | OP_5 | OP_6 | OP_7) SPACE* op_value SPACE* op_value SPACE* RP
+
+private op_value ::= PF_NAME | NULL | number | string | call_func
+
+private list ::= PF_NAME | (QUICK_LIST LP SPACE* list_item* SPACE* RP)
+
+private from_in_block ::= (IN SPACE* list) | (FROM SPACE* list_item SPACE* TO SPACE* number)
+
+private do_block ::= DO block_body
+
+private list_item ::= number | string | PF_NAME | NULL
+
+private collect_block ::= COLLECT SPACE* PF_NAME
 
 private property_def ::= LP SPACE* PF_NAME SPACE* property_value SPACE* RP
 
 private property_value ::= (number)|(string)
 
-private call_func_args ::= empty_block | PF_NAME | call_func
+private call_func_args ::= PF_NAME | call_func | list
 
-private if_condition ::= (LP SPACE* IF_NULL SPACE* PF_NAME SPACE* RP)
+private if_condition ::= (LP SPACE* if_value+ SPACE* RP) | if_value+
+
+private if_value ::= IF_NULL | operation_call | number | string | PF_NAME | NULL
 
 private if_block ::= block_body | NULL | PF_NAME | (LP SPACE* (NULL|PF_NAME) SPACE* RP)
 

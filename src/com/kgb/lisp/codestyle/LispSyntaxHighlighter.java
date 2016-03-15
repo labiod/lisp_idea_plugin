@@ -47,11 +47,20 @@ public class LispSyntaxHighlighter extends SyntaxHighlighterBase {
     @NotNull
     @Override
     public TextAttributesKey[] getTokenHighlights(IElementType tokenType) {
+        System.out.println("type: " + tokenType);
         if(tokenType.equals(LispTypes.EQ)) {
             return SEPARATOR_KEYS;
         } else if(tokenType.equals(LispTypes.KEYWORD) || tokenType.equals(LispTypes.DEFUN)
                 || tokenType.equals(LispTypes.LET) || tokenType.equals(LispTypes.IF)
-                || tokenType.equals(LispTypes.IF_NULL)) {
+                || tokenType.equals(LispTypes.IF_NULL) || tokenType.equals(LispTypes.LOOP)
+                || tokenType.equals(LispTypes.FOR) || tokenType.equals(LispTypes.IN)
+                || tokenType.equals(LispTypes.DO)  || tokenType.equals(LispTypes.FROM)
+                || tokenType.equals(LispTypes.TO)  || tokenType.equals(LispTypes.COLLECT)
+                || tokenType.equals(LispTypes.OP_1)  || tokenType.equals(LispTypes.OP_2)
+                || tokenType.equals(LispTypes.OP_3)  || tokenType.equals(LispTypes.OP_4)
+                || tokenType.equals(LispTypes.OP_5)  || tokenType.equals(LispTypes.OP_6)
+                || tokenType.equals(LispTypes.OP_7)
+                ) {
             return KEYWORD_KEYS;
         } else if(tokenType.equals(LispTypes.COMMENT)) {
             return COMMENT_KEYS;
@@ -63,7 +72,7 @@ public class LispSyntaxHighlighter extends SyntaxHighlighterBase {
             return INTEGER_KEYS;
         } else if(tokenType.equals(LispTypes.FUNC_NAME)) {
             return FUNCTION_NAME_KEYS;
-        } else if(tokenType.equals(LispTypes.PF_NAME) || tokenType.equals(LispTypes.NULL)) {
+        } else if(tokenType.equals(LispTypes.NULL)) {
             return ATTRIBUTES_KEYS;
         } else {
             return EMPTY_KEYS;
