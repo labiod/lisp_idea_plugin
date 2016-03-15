@@ -18,7 +18,7 @@
         LP='('
         RP=')'
 
-        space='regexp:[\s\n\t\r]+'
+        space='regexp:[\s\t]+'
         comment='regexp://.*'
         number='regexp:\d+(\.\d*)?'
         string="regexp:('([^'\\]|\\.)*'|\"([^\"\\]|\\.)*\")"
@@ -28,38 +28,48 @@
         op_3='*'
         op_4='/'
         op_5='!'
-        KEYWORD="regexp:(do)|(loop)|(in)|(for)|(let)"
+        PF_NAME="regexp:[a-zA-Z][a-zA-Z_\-0-9]*"
+        KEYWORD="regexp:(do)|(loop)|(in)|(for)"
         DEFUN="defun"
         LET="let"
-        PROPERTY_NAME="regexp:[a-zA-Z][a-zA-Z_\-0-9]*"
+        IF_NULL="null"
+        NULL="nil"
+        IF="if"
       ]
 }
 
 root ::= root_item *
 
-private root_item ::= LP SPACE* expr SPACE* RP {pin=1 recoverWhile=item_recovery}
+private root_item ::= !<<eof>> block_body
 
-private expr ::= (defun_item) | (call_expr) | (property)
+private block_body ::= let_def | def_fun_item | call_func | if_statement | empty_block
 
-private defun_item ::= DEFUN SPACE* PROPERTY_NAME SPACE* args SPACE* method_body
+empty_block ::= LP SPACE* RP
 
-private property ::= LET SPACE* LP LP SPACE* property_def SPACE* RP RP SPACE* form_def*
+def_fun_item ::= LP SPACE * DEFUN SPACE* PF_NAME SPACE* LP SPACE* def_func_args* SPACE* RP SPACE* block_body SPACE* RP
 
-private property_def ::= PROPERTY_NAME SPACE* property_value
+call_func ::= LP SPACE* func_name SPACE* call_func_args* SPACE* RP
 
-private form_def ::= LP SPACE* expr* SPACE* RP
+let_def ::= LP SPACE* LET SPACE* LP SPACE* property_def* SPACE* RP SPACE* block_body SPACE* RP
+
+if_statement ::= LP SPACE* IF SPACE* if_condition SPACE* if_block SPACE* else_block SPACE* RP
+
+func_name ::= PF_NAME
+
+def_func_args ::= ('regexp:[a-zA-Z][a-zA-Z_\-0-9]*')
+
+private property_def ::= LP SPACE* PF_NAME SPACE* property_value SPACE* RP
 
 private property_value ::= (number)|(string)
 
-private method_body ::= LP SPACE* expr SPACE* RP
+private call_func_args ::= empty_block | PF_NAME | call_func
 
-private call_expr ::= (KEYWORD SPACE* sub_expr) | (PROPERTY_NAME SPACE* sub_expr*) | (LP SPACE* call_expr SPACE* RP) | (PROPERTY_NAME SPACE* PROPERTY_NAME*)
+private if_condition ::= (LP SPACE* IF_NULL SPACE* PF_NAME SPACE* RP)
 
-private sub_expr ::= (LP SPACE* expr SPACE* RP) | (LP SPACE* PROPERTY_NAME args* SPACE* RP) | (PROPERTY_NAME args*)
+private if_block ::= block_body | NULL | PF_NAME | (LP SPACE* (NULL|PF_NAME) SPACE* RP)
 
-private args ::= (LP SPACE* PROPERTY_NAME * SPACE* RP) | (PROPERTY_NAME *)
+private else_block ::= if_block
 
-private item_recovery ::= !(RP)
 
 
 

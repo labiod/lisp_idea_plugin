@@ -20,8 +20,7 @@ import static com.intellij.openapi.editor.colors.TextAttributesKey.createTextAtt
 public class LispSyntaxHighlighter extends SyntaxHighlighterBase {
     private static final TextAttributesKey SEPARATOR = createTextAttributesKey("LISP_SEPARATOR", DefaultLanguageHighlighterColors.OPERATION_SIGN);
     private static final TextAttributesKey KEYWORD = createTextAttributesKey("LISP_KEYWORD", DefaultLanguageHighlighterColors.KEYWORD);
-    private static final TextAttributesKey KEY = createTextAttributesKey("LISP_KEY", DefaultLanguageHighlighterColors.KEYWORD);
-    private static final TextAttributesKey FUNCTION_NAME = createTextAttributesKey("LISP_FUNCTION_NAME", DefaultLanguageHighlighterColors.CONSTANT);
+    private static final TextAttributesKey FUNCTION_NAME = createTextAttributesKey("LISP_FUNCTION_NAME", DefaultLanguageHighlighterColors.FUNCTION_DECLARATION);
     private static final TextAttributesKey ATTRIBUTE = createTextAttributesKey("LISP_ATTRIBUTE", DefaultLanguageHighlighterColors.CONSTANT);
     private static final TextAttributesKey STRING = createTextAttributesKey("LISP_STRING", DefaultLanguageHighlighterColors.STRING);
     private static final TextAttributesKey INTEGER = createTextAttributesKey("LISP_INTEGER", DefaultLanguageHighlighterColors.NUMBER);
@@ -32,7 +31,6 @@ public class LispSyntaxHighlighter extends SyntaxHighlighterBase {
     public static final TextAttributesKey[] BAD_CHARACTER_KEYS = new TextAttributesKey[]{BAD_CHARACTER};
     public static final TextAttributesKey[] SEPARATOR_KEYS = new TextAttributesKey[]{SEPARATOR};
     public static final TextAttributesKey[] KEYWORD_KEYS = new TextAttributesKey[]{KEYWORD};
-    public static final TextAttributesKey[] KEY_KEYS = new TextAttributesKey[]{KEY};
     public static final TextAttributesKey[] FUNCTION_NAME_KEYS = new TextAttributesKey[]{FUNCTION_NAME};
     public static final TextAttributesKey[] ATTRIBUTES_KEYS = new TextAttributesKey[]{ATTRIBUTE};
     public static final TextAttributesKey[] STRING_KEYS = new TextAttributesKey[]{STRING};
@@ -52,8 +50,9 @@ public class LispSyntaxHighlighter extends SyntaxHighlighterBase {
         if(tokenType.equals(LispTypes.EQ)) {
             return SEPARATOR_KEYS;
         } else if(tokenType.equals(LispTypes.KEYWORD) || tokenType.equals(LispTypes.DEFUN)
-                || tokenType.equals(LispTypes.LET)) {
-            return KEY_KEYS;
+                || tokenType.equals(LispTypes.LET) || tokenType.equals(LispTypes.IF)
+                || tokenType.equals(LispTypes.IF_NULL)) {
+            return KEYWORD_KEYS;
         } else if(tokenType.equals(LispTypes.COMMENT)) {
             return COMMENT_KEYS;
         } else if(tokenType.equals(TokenType.BAD_CHARACTER)) {
@@ -62,8 +61,13 @@ public class LispSyntaxHighlighter extends SyntaxHighlighterBase {
             return STRING_KEYS;
         } else if(tokenType.equals(LispTypes.NUMBER)) {
             return INTEGER_KEYS;
+        } else if(tokenType.equals(LispTypes.FUNC_NAME)) {
+            return FUNCTION_NAME_KEYS;
+        } else if(tokenType.equals(LispTypes.PF_NAME) || tokenType.equals(LispTypes.NULL)) {
+            return ATTRIBUTES_KEYS;
         } else {
             return EMPTY_KEYS;
         }
     }
+
 }

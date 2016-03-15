@@ -22,35 +22,38 @@ EOL="\r"|"\n"|"\r\n"
 LINE_WS=[\ \t\f]
 WHITE_SPACE=({LINE_WS}|{EOL})+
 
-SPACE=[\s\n\t\r]+
+SPACE=[\s\t]+
 COMMENT="//".*
 NUMBER=[0-9]+(\.[0-9]*)?
 STRING=('([^'\\]|\\.)*'|\"([^\"\\]|\\.)*\")
-KEYWORD=(do)|(loop)|(in)|(for)|(let)
-PROPERTY_NAME=[a-zA-Z][a-zA-Z_\-0-9]*
+PF_NAME=[a-zA-Z][a-zA-Z_\-0-9]*
+KEYWORD=(do)|(loop)|(in)|(for)
 
 %%
 <YYINITIAL> {
-  {WHITE_SPACE}        { return com.intellij.psi.TokenType.WHITE_SPACE; }
+  {WHITE_SPACE}      { return com.intellij.psi.TokenType.WHITE_SPACE; }
 
-  ";"                  { return SEMI; }
-  "="                  { return EQ; }
-  "("                  { return LP; }
-  ")"                  { return RP; }
-  "+"                  { return OP_1; }
-  "-"                  { return OP_2; }
-  "*"                  { return OP_3; }
-  "/"                  { return OP_4; }
-  "!"                  { return OP_5; }
-  "defun"              { return DEFUN; }
-  "let"                { return LET; }
+  ";"                { return SEMI; }
+  "="                { return EQ; }
+  "("                { return LP; }
+  ")"                { return RP; }
+  "+"                { return OP_1; }
+  "-"                { return OP_2; }
+  "*"                { return OP_3; }
+  "/"                { return OP_4; }
+  "!"                { return OP_5; }
+  "defun"            { return DEFUN; }
+  "let"              { return LET; }
+  "null"             { return IF_NULL; }
+  "nil"              { return NULL; }
+  "if"               { return IF; }
 
-  {SPACE}              { return SPACE; }
-  {COMMENT}            { return COMMENT; }
-  {NUMBER}             { return NUMBER; }
-  {STRING}             { return STRING; }
-  {KEYWORD}            { return KEYWORD; }
-  {PROPERTY_NAME}      { return PROPERTY_NAME; }
+  {SPACE}            { return SPACE; }
+  {COMMENT}          { return COMMENT; }
+  {NUMBER}           { return NUMBER; }
+  {STRING}           { return STRING; }
+  {PF_NAME}          { return PF_NAME; }
+  {KEYWORD}          { return KEYWORD; }
 
   [^] { return com.intellij.psi.TokenType.BAD_CHARACTER; }
 }
