@@ -29,6 +29,12 @@
     <fileTypeFactory implementation="com.kgb.lisp.LispFileTypFactory" />
     <lang.parserDefinition language="Lisp" implementationClass="com.kgb.lisp.parser.LispParserDefinition" />
     <lang.syntaxHighlighterFactory language="Lisp" implementationClass="com.kgb.lisp.codestyle.LispSynthaxHighlighterFactory" />
+
+    <!-- Annotators -->
+    <annotator language="Lisp" implementationClass="com.kgb.lisp.annotators.LispDefFunAnnotator" />
+    <!--<annotator language="Lisp" implementationClass="com.kgb.lisp.annotators.LispPropertyAnnotator" />-->
+    <!-- Settings pages -->
+    <colorSettingsPage implementation="com.kgb.lisp.settings.LispColorSettingsPage" />
   </extensions>
 
   <actions>
