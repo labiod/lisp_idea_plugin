@@ -26,7 +26,6 @@ SPACE=[\s\t]+
 COMMENT=;.*
 NUMBER=[0-9]+(\.[0-9]*)?
 STRING=(\"([^\"\\]|\\.)*\")
-KEYWORD=(car)|(cdr)
 PF_NAME=[a-zA-Z][a-zA-Z_\-0-9]*
 
 %%
@@ -36,6 +35,10 @@ PF_NAME=[a-zA-Z][a-zA-Z_\-0-9]*
   "="                { return EQ; }
   "("                { return LP; }
   ")"                { return RP; }
+  "true"             { return TRUE; }
+  "false"            { return FALSE; }
+  "null"             { return IF_NULL; }
+  "nil"              { return NULL; }
   "+"                { return OP_1; }
   "-"                { return OP_2; }
   "*"                { return OP_3; }
@@ -48,26 +51,26 @@ PF_NAME=[a-zA-Z][a-zA-Z_\-0-9]*
   "for"              { return FOR; }
   "in"               { return IN; }
   "from"             { return FROM; }
+  "downfrom"         { return DOWNFROM; }
   "to"               { return TO; }
+  "upto"             { return UPTO; }
+  "downto"           { return DOWNTO; }
   "do"               { return DO; }
   "collect"          { return COLLECT; }
   "defun"            { return DEFUN; }
   "let"              { return LET; }
-  "null"             { return IF_NULL; }
-  "nil"              { return NULL; }
   "if"               { return IF; }
   "car"              { return CAR; }
   "cdr"              { return CDR; }
   "setq"             { return SETQ; }
   "cons"             { return CONS; }
-  "true"             { return TRUE; }
-  "false"            { return FALSE; }
+  "write"            { return WRITE; }
+  "print"            { return PRINT; }
 
   {SPACE}            { return SPACE; }
   {COMMENT}          { return COMMENT; }
   {NUMBER}           { return NUMBER; }
   {STRING}           { return STRING; }
-  {KEYWORD}          { return KEYWORD; }
   {PF_NAME}          { return PF_NAME; }
 
   [^] { return com.intellij.psi.TokenType.BAD_CHARACTER; }

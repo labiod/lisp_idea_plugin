@@ -49,7 +49,7 @@ public class LispSyntaxHighlighter extends SyntaxHighlighterBase {
     public TextAttributesKey[] getTokenHighlights(IElementType tokenType) {
         if(tokenType.equals(LispTypes.EQ)) {
             return SEPARATOR_KEYS;
-        } else if(tokenType.equals(LispTypes.KEYWORD) || tokenType.equals(LispTypes.DEFUN)
+        } else if(tokenType.equals(LispTypes.DEFUN)
                 || tokenType.equals(LispTypes.LET) || tokenType.equals(LispTypes.IF)
                 || tokenType.equals(LispTypes.IF_NULL) || tokenType.equals(LispTypes.LOOP)
                 || tokenType.equals(LispTypes.FOR) || tokenType.equals(LispTypes.IN)

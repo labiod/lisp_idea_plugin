@@ -1,17 +1,15 @@
 package com.kgb.lisp;
 
+import com.intellij.lang.ASTNode;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.search.FileTypeIndex;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.indexing.FileBasedIndex;
-import com.kgb.lisp.psi.LispCallFunc;
-import com.kgb.lisp.psi.LispDefFunItem;
-import com.kgb.lisp.psi.LispFile;
-import com.kgb.lisp.psi.LispSetqBlock;
-import com.kgb.lisp.psi.impl.LispDefFunItemImpl;
+import com.kgb.lisp.psi.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -23,37 +21,41 @@ import java.util.List;
  * Class com.kgb.lisp.LispUtil
  */
 public class LispUtil {
-    public static List<LispDefFunItem> findDefFunctions(Project project, String key) {
-        List<LispDefFunItem> result = null;
+    public static List<LispDefFun> findDefFunctions(Project project, String key) {
+        List<LispDefFun> result = null;
         Collection<VirtualFile> virtualFiles = FileBasedIndex.getInstance().getContainingFiles(FileTypeIndex.NAME,
                 LispFileType.INSTANCE, GlobalSearchScope.allScope(project));
         for(VirtualFile virtualFile : virtualFiles) {
             LispFile lispFile = (LispFile) PsiManager.getInstance(project).findFile(virtualFile);
             if(lispFile != null) {
-                LispDefFunItem[] defFunctions = PsiTreeUtil.getChildrenOfType(lispFile, LispDefFunItem.class);
+                LispBlockBody[] defFunctions = PsiTreeUtil.getChildrenOfType(lispFile, LispBlockBody.class);
                 if(defFunctions != null) {
-                    for(LispDefFunItem item : defFunctions) {
-                        if(key.equals(item.getFunctionName())) {
-                            if(result == null) {
-                                result = new ArrayList<LispDefFunItem>();
+                    for(LispBlockBody block : defFunctions) {
+                        ASTNode node = block.getNode().findChildByType(LispTypes.DEF_FUN);
+                        if(node != null) {
+                            LispDefFun item = (LispDefFun) node.getPsi();
+                            if (key.equals(item.getFunctionName())) {
+                                if (result == null) {
+                                    result = new ArrayList<LispDefFun>();
+                                }
+                                result.add(item);
                             }
-                            result.add(item);
                         }
                     }
                 }
             }
         }
-        return result != null ? result : Collections.<LispDefFunItem>emptyList();
+        return result != null ? result : Collections.<LispDefFun>emptyList();
     }
 
-    public static List<LispDefFunItem> findDefFunctions(Project project) {
-        List<LispDefFunItem> result = new ArrayList<LispDefFunItem>();
+    public static List<LispDefFun> findDefFunctions(Project project) {
+        List<LispDefFun> result = new ArrayList<LispDefFun>();
         Collection<VirtualFile> virtualFiles = FileBasedIndex.getInstance().getContainingFiles(FileTypeIndex.NAME, LispFileType.INSTANCE,
                 GlobalSearchScope.allScope(project));
         for (VirtualFile virtualFile : virtualFiles) {
             LispFile simpleFile = (LispFile) PsiManager.getInstance(project).findFile(virtualFile);
             if (simpleFile != null) {
-                LispDefFunItem[] properties = PsiTreeUtil.getChildrenOfType(simpleFile, LispDefFunItem.class);
+                LispDefFun[] properties = PsiTreeUtil.getChildrenOfType(simpleFile, LispDefFun.class);
                 if (properties != null) {
                     Collections.addAll(result, properties);
                 }
@@ -69,14 +71,23 @@ public class LispUtil {
         for(VirtualFile virtualFile : virtualFiles) {
             LispFile lispFile = (LispFile) PsiManager.getInstance(project).findFile(virtualFile);
             if(lispFile != null) {
-                LispSetqBlock[] defFunctions = PsiTreeUtil.getChildrenOfType(lispFile, LispSetqBlock.class);
+                LispBlockBody[] defFunctions = PsiTreeUtil.getChildrenOfType(lispFile, LispBlockBody.class);
                 if(defFunctions != null) {
-                    for(LispSetqBlock item : defFunctions) {
-                        if(key.equals(item.getProperty())) {
-                            if(result == null) {
-                                result = new ArrayList<LispSetqBlock>();
+                    for(LispBlockBody block : defFunctions) {
+                        if(block.getSpecialForm() != null) {
+                            LispSetqBlock item = block.getSpecialForm().getSetqBlock();
+                            if(item != null) {
+                                List<String> properties = item.getProperties();
+                                for(String property : properties) {
+                                    if (key.equals(property)) {
+                                        if (result == null) {
+                                            result = new ArrayList<LispSetqBlock>();
+                                        }
+                                        result.add(item);
+                                        break;
+                                    }
+                                }
                             }
-                            result.add(item);
                         }
                     }
                 }
@@ -120,5 +131,28 @@ public class LispUtil {
         baseMethod.add("*");
         baseMethod.add("/");
         return baseMethod;
+    }
+
+    public static boolean hasPropertyInParent(Project project, PsiElement element, String property) {
+        PsiElement parent = element;
+        while(parent != null ) {
+            parent = parent.getParent();
+            if(parent instanceof LispDefFun) {
+                List<LispDefVar> vars = ((LispDefFun) parent).getDefVarList();
+                for(LispDefVar var : vars) {
+                    if (property.equals(var.getText())) {
+                        return true;
+                    }
+                }
+            } else if(parent instanceof LispLetBlock) {
+                List<LispLetVarBlock> vars = ((LispLetBlock) parent).getLetVarBlockList();
+                for(LispLetVarBlock var : vars) {
+                    if (property.equals(var.getVar().getText())) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 }

@@ -24,6 +24,8 @@
         string="regexp:(\"([^\"\\]|\\.)*\")"
         TRUE="true"
         FALSE="false"
+        IF_NULL="null"
+        NULL="nil"
 
         op_1='+'
         op_2='-'
@@ -35,18 +37,18 @@
 
         //keywords block
         QV="'"
-        KEYWORD="regexp:(car)|(cdr)"
         LOOP="loop"
         FOR="for"
         IN="in"
         FROM="from"
+        DOWNFROM="downfrom"
         TO="to"
+        UPTO="upto"
+        DOWNTO="downto"
         DO="do"
         COLLECT="collect"
         DEFUN="defun"
         LET="let"
-        IF_NULL="null"
-        NULL="nil"
         IF="if"
         car="car"
         cdr="cdr"
@@ -57,68 +59,111 @@
       ]
 }
 
+
 root ::= root_item *
+
+//root_item definition
 
 private root_item ::= !<<eof>> block_body
 
-private block_body ::= let_def | def_fun_item | call_func | if_statement | empty_block | loop_block
+block_body ::= def_fun | special_form | call_func | empty_block | if_form
 
-empty_block ::= LP SPACE* RP
+//**************************************************************************
+//base structure and function definition
 
-def_fun_item ::= LP SPACE* DEFUN SPACE* func_name SPACE* LP SPACE* var_def* SPACE* RP SPACE* block_body+ SPACE* RP {methods=[getFunctionName]}
+basic_type ::= number | string | boolean_value | NULL | string_value | list
 
-call_func ::= LP SPACE* func_name SPACE* func_arg* SPACE* RP
+string_value ::= QV string_arg
 
-let_def ::= LP SPACE* LET SPACE* LP SPACE* property_def* SPACE* RP SPACE* block_body SPACE* RP
+string_arg ::= var | boolean_value | number | PF_NAME
 
-if_statement ::= LP SPACE* IF SPACE* if_condition+ SPACE* if_block? SPACE* else_block? SPACE* RP
+boolean_value ::= TRUE | FALSE
 
-func_name ::= PF_NAME | CAR | CDR | SETQ | CONS
+list ::= QV LP SPACE* string_arg* SPACE* RP
 
-loop_block ::= LP SPACE* LOOP SPACE* FOR SPACE* var_def SPACE* from_in_block+ SPACE* SPACE* do_block* SPACE* collect_block* SPACE* RP
+keywords ::= LOOP | FOR | IN | FROM | TO | DO | COLLECT | DEFUN | LET | IF | setq
 
-operation_call ::= LP SPACE* operation_type SPACE* op_value SPACE* op_value SPACE* RP
+base_function ::= write | print | operation | car | cdr | cons
 
-to_string ::= QV (TRUE | FALSE | number | PF_NAME)
-
-setq_block ::= LP SPACE* setq SPACE* setq_items+ SPACE* RP {methods=[getProperty]}
-
-setq_items ::= (LP SPACE* var_def SPACE* var_value SPACE* )
-
-var_def ::= PF_NAME
-
-var_value ::= var_def | call_func | number | string | NULL | TRUE | FALSE | to_string | list
-
-func_arg ::= var | call_func | list | to_string | operation_call | number | string | NULL
+operation ::=  OP_1 | OP_2 | OP_3 | OP_4 | OP_5 | OP_6 | OP_7
 
 var ::= PF_NAME
 
-private operation_type ::= OP_1 | OP_2 | OP_3 | OP_4 | OP_5 | OP_6 | OP_7
+func_name ::= PF_NAME | base_function
 
-private op_value ::= var | NULL | number | string | call_func | to_string
+//define new function
+def_fun ::= LP SPACE* DEFUN SPACE* func_name SPACE* LP SPACE* def_var* SPACE* RP SPACE* function_body SPACE* RP {methods=[getFunctionName getArgumentCount]}
 
-private list ::= var | (QV LP SPACE* list_item* SPACE* RP)
+def_var ::= PF_NAME
 
-private from_in_block ::= (IN SPACE* list) | (FROM SPACE* list_item SPACE* TO SPACE* number)
+empty_block ::= LP SPACE* RP
 
-private do_block ::= DO block_body
+function_body ::= LP SPACE* block_body* SPACE* RP | block_body
 
-private list_item ::= number | string | var | NULL | to_string
+arg ::= var | string_value | call_func | basic_type
 
-private collect_block ::= COLLECT SPACE* PF_NAME
+special_form ::= loop_block | setq_block | let_block | base_function_form
 
-private property_def ::= LP SPACE* var_def SPACE* property_value SPACE* RP
+base_function_form ::= LP SPACE* base_function SPACE* arg* SPACE* RP
 
-private property_value ::= (number)|(string)
+//loop definition
+
+loop_block ::= LP SPACE* LOOP SPACE* loop_for_block* SPACE* do_block? SPACE* RP
+
+loop_for_block ::= FOR var SPACE* (loop_for_in_block | loop_for_from_block)
+
+loop_for_in_block ::= IN SPACE* arg
+
+loop_for_from_block ::= (FROM SPACE* number SPACE* TO SPACE* number) |
+                        (DOWNFROM SPACE* number SPACE* TO SPACE* number) |
+                        (FROM SPACE* number SPACE* DOWNTO number) |
+                        (UPTO SPACE* number)
+
+do_block ::= DO ((LP SPACE* block_body SPACE* RP ) | block_body )
+
+//setq definition
+
+setq_block ::= LP SPACE* SETQ SPACE* setq_args* SPACE* RP {methods=[getProperties]}
+
+setq_args ::= (LP SPACE* var SPACE* arg SPACE* RP) | var SPACE* arg
+
+//let definition
+
+let_block ::= (LP SPACE* LET SPACE* LP SPACE* let_var_block* SPACE* RP SPACE* let_body* SPACE* RP)
+
+let_var_block ::= LP SPACE* var SPACE* arg SPACE* RP
+
+let_body ::= LP SPACE* block_body* SPACE* RP | block_body
+
+//if form definition
+
+if_form ::= LP SPACE* IF SPACE* conditions* SPACE* if_body SPACE* RP
+
+if_body ::= (if_block? SPACE* else_block) | (if_block SPACE* else_block?) | (if_block SPACE* else_block)
+
+conditions ::= (LP SPACE* IF_NULL SPACE* var SPACE* RP) | operation_form | var
+
+if_block ::= LP SPACE* block_body* SPACE* RP | block_body | arg
+
+else_block ::= (LP SPACE* block_body* SPACE* RP) | block_body | arg
+
+//operation definition
+operation_form ::= LP SPACE* operation SPACE* arg SPACE* arg SPACE* RP
 
 
-private if_condition ::= (LP SPACE* if_value+ SPACE* RP) | if_value
+//***************************************************************************
 
-private if_value ::= IF_NULL | operation_call | number | string | PF_NAME | NULL
+//Call function definition
+call_func ::= LP SPACE* func_name SPACE* arg* SPACE* RP {pin=3 methods=wrong_call}
 
-private if_block ::= block_body | NULL | var | (LP SPACE* (NULL|PF_NAME) SPACE* RP)
+private wrong_call ::= !RP
 
-private else_block ::= if_block
+
+
+
+
+
+
 
 
 
