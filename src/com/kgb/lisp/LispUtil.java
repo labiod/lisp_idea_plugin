@@ -52,12 +52,18 @@ public class LispUtil {
         List<LispDefFun> result = new ArrayList<LispDefFun>();
         Collection<VirtualFile> virtualFiles = FileBasedIndex.getInstance().getContainingFiles(FileTypeIndex.NAME, LispFileType.INSTANCE,
                 GlobalSearchScope.allScope(project));
-        for (VirtualFile virtualFile : virtualFiles) {
-            LispFile simpleFile = (LispFile) PsiManager.getInstance(project).findFile(virtualFile);
-            if (simpleFile != null) {
-                LispDefFun[] properties = PsiTreeUtil.getChildrenOfType(simpleFile, LispDefFun.class);
-                if (properties != null) {
-                    Collections.addAll(result, properties);
+        for(VirtualFile virtualFile : virtualFiles) {
+            LispFile lispFile = (LispFile) PsiManager.getInstance(project).findFile(virtualFile);
+            if(lispFile != null) {
+                LispBlockBody[] defFunctions = PsiTreeUtil.getChildrenOfType(lispFile, LispBlockBody.class);
+                if(defFunctions != null) {
+                    for(LispBlockBody block : defFunctions) {
+                        ASTNode node = block.getNode().findChildByType(LispTypes.DEF_FUN);
+                        if(node != null) {
+                            LispDefFun item = (LispDefFun) node.getPsi();
+                            result.add(item);
+                        }
+                    }
                 }
             }
         }
@@ -94,22 +100,6 @@ public class LispUtil {
             }
         }
         return result != null ? result : Collections.<LispSetqBlock>emptyList();
-    }
-
-    public static List<LispSetqBlock> findProperties(Project project) {
-        List<LispSetqBlock> result = new ArrayList<LispSetqBlock>();
-        Collection<VirtualFile> virtualFiles = FileBasedIndex.getInstance().getContainingFiles(FileTypeIndex.NAME, LispFileType.INSTANCE,
-                GlobalSearchScope.allScope(project));
-        for (VirtualFile virtualFile : virtualFiles) {
-            LispFile simpleFile = (LispFile) PsiManager.getInstance(project).findFile(virtualFile);
-            if (simpleFile != null) {
-                LispSetqBlock[] properties = PsiTreeUtil.getChildrenOfType(simpleFile, LispSetqBlock.class);
-                if (properties != null) {
-                    Collections.addAll(result, properties);
-                }
-            }
-        }
-        return result;
     }
 
     public static List<String> getBaseMethodName() {
@@ -154,5 +144,34 @@ public class LispUtil {
             }
         }
         return false;
+    }
+
+    public static List<String> getAllProperty(Project project) {
+        List<String> result = null;
+        Collection<VirtualFile> virtualFiles = FileBasedIndex.getInstance().getContainingFiles(FileTypeIndex.NAME,
+                LispFileType.INSTANCE, GlobalSearchScope.allScope(project));
+        for(VirtualFile virtualFile : virtualFiles) {
+            LispFile lispFile = (LispFile) PsiManager.getInstance(project).findFile(virtualFile);
+            if(lispFile != null) {
+                LispBlockBody[] defFunctions = PsiTreeUtil.getChildrenOfType(lispFile, LispBlockBody.class);
+                if(defFunctions != null) {
+                    for(LispBlockBody block : defFunctions) {
+                        if(block.getSpecialForm() != null) {
+                            LispSetqBlock item = block.getSpecialForm().getSetqBlock();
+                            if(item != null) {
+                                List<String> properties = item.getProperties();
+                                for(String property : properties) {
+                                    if (result == null) {
+                                        result = new ArrayList<String>();
+                                    }
+                                    result.add(property);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return result != null ? result : Collections.<String>emptyList();
     }
 }

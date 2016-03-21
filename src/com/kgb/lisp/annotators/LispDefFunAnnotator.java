@@ -13,6 +13,7 @@ import com.intellij.psi.PsiLiteralExpression;
 import com.kgb.lisp.LispUtil;
 import com.kgb.lisp.psi.LispCallFunc;
 import com.kgb.lisp.psi.LispDefFun;
+import com.kgb.lisp.psi.LispFuncName;
 import com.kgb.lisp.psi.LispTypes;
 import org.jetbrains.annotations.NotNull;
 
@@ -26,7 +27,7 @@ public class LispDefFunAnnotator implements Annotator {
     @Override
     public void annotate(@NotNull PsiElement element, @NotNull AnnotationHolder holder) {
         String value = element.getText();
-        if (value != null && element.getNode().getElementType().toString().equals(LispTypes.CALL_FUNC.toString())) {
+        if (value != null && element instanceof LispCallFunc) {
             Project project = element.getProject();
             ASTNode funNameElement = element.getNode().findChildByType(LispTypes.FUNC_NAME);
             if(funNameElement == null) {
@@ -34,14 +35,15 @@ public class LispDefFunAnnotator implements Annotator {
             }
             String key = funNameElement.getText();
             List<LispDefFun> defFunItemList = LispUtil.findDefFunctions(project, key);
+            LispFuncName funcName = ((LispCallFunc) element).getFuncName();
             if (defFunItemList.size() == 1) {
                 LispDefFun functionDef = defFunItemList.get(0);
                 int argCount = ((LispCallFunc)element).getArgList().size();
                 if(argCount == functionDef.getArgumentCount()) {
-                    TextRange range = new TextRange(element.getTextRange().getStartOffset() + 7,
-                            element.getTextRange().getStartOffset() + 7);
+                    TextRange range = new TextRange(funcName.getTextRange().getStartOffset(),
+                            funcName.getTextRange().getEndOffset());
                     Annotation annotation = holder.createInfoAnnotation(range, null);
-                    annotation.setTextAttributes(DefaultLanguageHighlighterColors.LINE_COMMENT);
+                    annotation.setTextAttributes(DefaultLanguageHighlighterColors.FUNCTION_CALL);
                 } else if(argCount < functionDef.getArgumentCount()) {
                     TextRange range = new TextRange(element.getTextRange().getStartOffset() + 1,
                             element.getTextRange().getEndOffset());

@@ -1,7 +1,9 @@
 package com.kgb.lisp.annotators;
 
+import com.intellij.lang.annotation.Annotation;
 import com.intellij.lang.annotation.AnnotationHolder;
 import com.intellij.lang.annotation.Annotator;
+import com.intellij.openapi.editor.DefaultLanguageHighlighterColors;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
@@ -35,10 +37,10 @@ public class LispPropertyAnnotator implements Annotator {
                         String key = value.trim();
                         List<LispSetqBlock> properties = LispUtil.findProperties(project, key);
                         if (properties.size() == 1) {
-                            TextRange range = new TextRange(element.getTextRange().getStartOffset(),
-                                    element.getTextRange().getEndOffset());
-//                            Annotation annotation = holder.createInfoAnnotation(range, null);
-//                            annotation.setTextAttributes(DefaultLanguageHighlighterColors.LINE_COMMENT);
+                            TextRange range = new TextRange(arg.getTextRange().getStartOffset(),
+                                    arg.getTextRange().getEndOffset());
+                            Annotation annotation = holder.createInfoAnnotation(range, null);
+                            annotation.setTextAttributes(DefaultLanguageHighlighterColors.PARAMETER);
                         } else if (properties.size() == 0) {
                             if(!LispUtil.hasPropertyInParent(project, element, key)) {
                                 TextRange range = new TextRange(arg.getTextRange().getStartOffset(),

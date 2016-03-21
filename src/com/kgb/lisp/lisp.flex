@@ -64,8 +64,10 @@ PF_NAME=[a-zA-Z][a-zA-Z_\-0-9]*
   "cdr"              { return CDR; }
   "setq"             { return SETQ; }
   "cons"             { return CONS; }
+  "def_structure"    { return DEF_STRUCTURE; }
   "write"            { return WRITE; }
   "print"            { return PRINT; }
+  "DEFSTRUCT"        { return DEFSTRUCT; }
 
   {SPACE}            { return SPACE; }
   {COMMENT}          { return COMMENT; }
