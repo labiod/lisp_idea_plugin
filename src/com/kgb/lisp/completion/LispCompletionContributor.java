@@ -18,8 +18,7 @@ import java.util.List;
  */
 public class LispCompletionContributor extends CompletionContributor {
     public LispCompletionContributor() {
-        System.out.println("create completion");
-        extend(CompletionType.BASIC, PlatformPatterns.psiElement(LispTypes.PF_NAME).withLanguage(LispLanguage.INSTANCE),
+        extend(CompletionType.BASIC, PlatformPatterns.psiElement(LispTypes.SYMBOL).withLanguage(LispLanguage.INSTANCE),
                 new CompletionProvider<CompletionParameters>() {
                     @Override
                     protected void addCompletions(@NotNull CompletionParameters completionParameters, ProcessingContext processingContext, @NotNull CompletionResultSet resultSet) {
@@ -41,7 +40,10 @@ public class LispCompletionContributor extends CompletionContributor {
                         } else {
                             resultSet.addElement(LookupElementBuilder.create("something"));
                         }
-
+                        List<String> makesOption = LispUtil.getMakeOption(completionParameters.getEditor().getProject());
+                        for(String make : makesOption) {
+                            resultSet.addElement(LookupElementBuilder.create(make));
+                        }
                     }
                 });
     }

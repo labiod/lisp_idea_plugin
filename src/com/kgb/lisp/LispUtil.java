@@ -70,6 +70,48 @@ public class LispUtil {
         return result;
     }
 
+    public static List<LispDefStructure> findDefStructures(Project project) {
+        List<LispDefStructure> result = new ArrayList<LispDefStructure>();
+        Collection<VirtualFile> virtualFiles = FileBasedIndex.getInstance().getContainingFiles(FileTypeIndex.NAME, LispFileType.INSTANCE,
+                GlobalSearchScope.allScope(project));
+        for(VirtualFile virtualFile : virtualFiles) {
+            LispFile lispFile = (LispFile) PsiManager.getInstance(project).findFile(virtualFile);
+            if(lispFile != null) {
+                LispBlockBody[] defBlocks = PsiTreeUtil.getChildrenOfType(lispFile, LispBlockBody.class);
+                if(defBlocks != null) {
+                    for(LispBlockBody block : defBlocks) {
+                        LispDefStructure defStructure = block.getDefStructure();
+                        if(defStructure != null) {
+                            result.add(defStructure);
+                        }
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    public static List<LispDefStructure> findDefStructures(Project project, String key) {
+        List<LispDefStructure> result = new ArrayList<LispDefStructure>();
+        Collection<VirtualFile> virtualFiles = FileBasedIndex.getInstance().getContainingFiles(FileTypeIndex.NAME, LispFileType.INSTANCE,
+                GlobalSearchScope.allScope(project));
+        for(VirtualFile virtualFile : virtualFiles) {
+            LispFile lispFile = (LispFile) PsiManager.getInstance(project).findFile(virtualFile);
+            if(lispFile != null) {
+                LispBlockBody[] defBlocks = PsiTreeUtil.getChildrenOfType(lispFile, LispBlockBody.class);
+                if(defBlocks != null) {
+                    for(LispBlockBody block : defBlocks) {
+                        LispDefStructure defStructure = block.getDefStructure();
+                        if(defStructure != null && key.equals(defStructure.getStructNameAndOptions().getStructName().getText())) {
+                            result.add(defStructure);
+                        }
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
     public static List<LispSetqBlock> findProperties(Project project, String key) {
         List<LispSetqBlock> result = null;
         Collection<VirtualFile> virtualFiles = FileBasedIndex.getInstance().getContainingFiles(FileTypeIndex.NAME,
@@ -173,5 +215,17 @@ public class LispUtil {
             }
         }
         return result != null ? result : Collections.<String>emptyList();
+    }
+
+    public static List<String> getMakeOption(Project project) {
+        List<String> result = new ArrayList<String>();
+        result.add("make-array");
+        result.add("make-hash-table");
+        result.add("make-list");
+        List<LispDefStructure> defStructures = findDefStructures(project);
+        for(LispDefStructure defStructure : defStructures) {
+            result.add("make-" + defStructure.getStructNameAndOptions().getStructName().getText());
+        }
+        return result;
     }
 }

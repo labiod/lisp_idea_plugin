@@ -60,7 +60,15 @@ public class LispSyntaxHighlighter extends SyntaxHighlighterBase {
                 || tokenType.equals(LispTypes.OP_1)  || tokenType.equals(LispTypes.OP_2)
                 || tokenType.equals(LispTypes.OP_3)  || tokenType.equals(LispTypes.OP_4)
                 || tokenType.equals(LispTypes.OP_5)  || tokenType.equals(LispTypes.OP_6)
-                || tokenType.equals(LispTypes.OP_7)
+                || tokenType.equals(LispTypes.OP_7) || tokenType.equals(LispTypes.DEFSTRUCT)
+                || tokenType.equals(LispTypes.MAKE) || tokenType.equals(LispTypes.OP_2)
+                || tokenType.equals(LispTypes.COPIER_KEY) || tokenType.equals(LispTypes.CONC_NAME_KEY)
+                || tokenType.equals(LispTypes.CONSTRUCTOR_KEY) || tokenType.equals(LispTypes.INCLUDE_KEY)
+                || tokenType.equals(LispTypes.PRINT_OBJECT_KEY) || tokenType.equals(LispTypes.PRINT_FUNCTION_KEY)
+                || tokenType.equals(LispTypes.TYPE_KEY) || tokenType.equals(LispTypes.READ_ONLY_KEY)
+                || tokenType.equals(LispTypes.ELEMENT_TYPE_KEY) || tokenType.equals(LispTypes.INITIAL_CONTENTS_KEY)
+                || tokenType.equals(LispTypes.INITIAL_ELEMENT_KEY) || tokenType.equals(LispTypes.INITIAL_OFFSET_KEY)
+                || tokenType.equals(LispTypes.FILL_POINTER_KEY) || tokenType.equals(LispTypes.NAMED_OPTION_KEY)
                 ) {
             return KEYWORD_KEYS;
         } else if(tokenType.equals(LispTypes.COMMENT)) {
@@ -71,7 +79,7 @@ public class LispSyntaxHighlighter extends SyntaxHighlighterBase {
             return STRING_KEYS;
         } else if(tokenType.equals(LispTypes.NUMBER)) {
             return INTEGER_KEYS;
-        } else if(tokenType.equals(LispTypes.PF_NAME)) {
+        } else if(tokenType.equals(LispTypes.SYMBOL)) {
             return ATTRIBUTES_KEYS;
         } else if(tokenType.equals(LispTypes.NULL)
                 || tokenType.equals(LispTypes.TRUE) || tokenType.equals(LispTypes.FALSE)
