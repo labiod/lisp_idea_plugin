@@ -33,10 +33,11 @@
         comment='regexp:;.*'
         number='regexp:\d+(\.\d*)?'
         string="regexp:(\"([^\"\\]|\\.)*\")"
-        TRUE="true"
-        FALSE="false"
+        TRUE="regexp:true|t"
+        FALSE="regexp:false|f"
         IF_NULL="null"
         NULL="nil"
+        hash_string="regexp:\*[a-zA-Z][a-zA-Z_\-0-9]*\*"
 
         op_1='+'
         op_2='-'
@@ -82,7 +83,7 @@
         print_object_key = ":print-object"
         print_function_key = ":print-function"
         type_key = ":type"
-        read_only_key = ":read_only"
+        read_only_key = ":read-only"
         initial_element_key = ":initial_element"
         initial_contents_key = ":initial_contents"
         fill_pointer_key = ":fill_pointer"
@@ -149,7 +150,7 @@ empty_block ::= LP SPACE* RP
 
 function_body ::= LP SPACE* block_body* SPACE* RP | block_body
 
-arg ::= var | string_value | call_func | basic_type
+arg ::= var | string_value | make_def | call_func | basic_type | hash_string
 
 special_form ::= loop_block | setq_block | let_block | base_function_form
 

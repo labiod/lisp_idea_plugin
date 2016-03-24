@@ -147,6 +147,7 @@ public class LispUtil {
     public static List<String> getBaseMethodName() {
         List<String> baseMethod = new ArrayList<String>();
         baseMethod.add("defun");
+        baseMethod.add("defstruct");
         baseMethod.add("if");
         baseMethod.add("car");
         baseMethod.add("cdr");

@@ -26,6 +26,9 @@ SPACE=[\s\t]+
 COMMENT=;.*
 NUMBER=[0-9]+(\.[0-9]*)?
 STRING=(\"([^\"\\]|\\.)*\")
+TRUE=true|t
+FALSE=false|f
+HASH_STRING=\*[a-zA-Z][a-zA-Z_\-0-9]*\*
 MAKE=make-[a-zA-Z][a-zA-Z_\-0-9]*
 SYMBOL=[a-zA-Z][a-zA-Z_\-0-9]*
 OBJECT_FIELD=\:[a-zA-Z][a-zA-Z_\-0-9]*
@@ -38,8 +41,6 @@ OBJECT_FIELD=\:[a-zA-Z][a-zA-Z_\-0-9]*
   "("                      { return LP; }
   ")"                      { return RP; }
   "-"                      { return OP_2; }
-  "true"                   { return TRUE; }
-  "false"                  { return FALSE; }
   "null"                   { return IF_NULL; }
   "nil"                    { return NULL; }
   "+"                      { return OP_1; }
@@ -77,7 +78,7 @@ OBJECT_FIELD=\:[a-zA-Z][a-zA-Z_\-0-9]*
   ":print-object"          { return PRINT_OBJECT_KEY; }
   ":print-function"        { return PRINT_FUNCTION_KEY; }
   ":type"                  { return TYPE_KEY; }
-  ":read_only"             { return READ_ONLY_KEY; }
+  ":read-only"             { return READ_ONLY_KEY; }
   ":initial_element"       { return INITIAL_ELEMENT_KEY; }
   ":initial_contents"      { return INITIAL_CONTENTS_KEY; }
   ":fill_pointer"          { return FILL_POINTER_KEY; }
@@ -98,6 +99,9 @@ OBJECT_FIELD=\:[a-zA-Z][a-zA-Z_\-0-9]*
   {COMMENT}                { return COMMENT; }
   {NUMBER}                 { return NUMBER; }
   {STRING}                 { return STRING; }
+  {TRUE}                   { return TRUE; }
+  {FALSE}                  { return FALSE; }
+  {HASH_STRING}            { return HASH_STRING; }
   {MAKE}                   { return MAKE; }
   {SYMBOL}                 { return SYMBOL; }
   {OBJECT_FIELD}           { return OBJECT_FIELD; }
