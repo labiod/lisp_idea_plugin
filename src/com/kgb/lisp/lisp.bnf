@@ -37,7 +37,7 @@
         FALSE="regexp:false|f"
         IF_NULL="null"
         NULL="nil"
-        hash_string="regexp:\*[a-zA-Z][a-zA-Z_\-0-9]*\*"
+        hash_symbol="regexp:\*[a-zA-Z][a-zA-Z_\-0-9]*\*"
 
         op_1='+'
         op_2='-'
@@ -61,13 +61,21 @@
         COLLECT="collect"
         DEFUN="defun"
         DEFSTRUCT="defstruct"
+        DEFVAR="defvar"
         LET="let"
         IF="if"
         car="car"
         cdr="cdr"
         setq="setq"
         cons="cons"
+        read="read"
+        list="list"
+        getf="getf"
+        push="push"
+        dolist="dolist"
+        format="format"
         MAKE="regexp:make-[a-zA-Z][a-zA-Z_\-0-9]*"
+
         //keywords block end
         symbol="regexp:[a-zA-Z][a-zA-Z_\-0-9]*"
         object_field="regexp:\:[a-zA-Z][a-zA-Z_\-0-9]*"
@@ -99,12 +107,11 @@
 
 
 root ::= root_item *
-
 //root_item definition
 
 private root_item ::= !<<eof>> block_body
 
-block_body ::= def_fun | special_form | call_func | empty_block | if_form | def_structure | make_def
+block_body ::= defun_block | special_form | call_func | empty_block | if_form | def_structure | make_def | hash_symbol | symbol
 
 //**************************************************************************
 //base structure and function definition
@@ -119,13 +126,13 @@ boolean_value ::= TRUE | FALSE
 
 list_def ::= QV LP SPACE* string_arg* SPACE* RP
 
-keywords ::= LOOP | FOR | IN | FROM | TO | DO | COLLECT | DEFUN | LET | IF | setq | LAMBDA | DECLARE | DEFSTRUCT
+keywords ::= LOOP | FOR | IN | FROM | TO | DO | COLLECT | DEFUN | LET | IF | setq | LAMBDA | DECLARE | DEFSTRUCT | MAKE | DEFVAR
 
-base_function ::= write | print | operation | car | cdr | cons
+base_function ::= write | print | operation | car | cdr | cons | read | list | getf | format
 
 operation ::=  OP_1 | OP_2 | OP_3 | OP_4 | OP_5 | OP_6 | OP_7
 
-var ::= symbol
+var ::= symbol | hash_symbol
 
 func_name ::= symbol | base_function
 
@@ -136,7 +143,7 @@ private lambda_body ::= block_body
 private lambda_list ::= (LP SPACE* RP) | (LP SPACE* var* SPACE* RP)
 
 //define new function
-def_fun ::= LP SPACE* DEFUN SPACE* func_name SPACE* LP SPACE* def_var* SPACE* RP SPACE* documentation? SPACE* function_body SPACE* RP {methods=[getFunctionName getArgumentCount]}
+defun_block ::= LP SPACE* DEFUN SPACE* func_name SPACE* LP SPACE* defun_var* SPACE* RP SPACE* documentation? SPACE* form_body+ SPACE* RP {methods=[getFunctionName getArgumentCount]}
 
 documentation ::= string
 
@@ -144,36 +151,42 @@ declaration ::= LP SPACE* DECLARE SPACE* declare_body* SPACE* RP
 
 private declare_body ::= (LP SPACE* var SPACE* arg SPACE* RP)
 
-def_var ::= symbol
+defun_var ::= symbol
 
 empty_block ::= LP SPACE* RP
 
-function_body ::= LP SPACE* block_body* SPACE* RP | block_body
+form_body ::= block_body | (LP SPACE* RP)
 
-arg ::= var | string_value | make_def | call_func | basic_type | hash_string
+arg ::= var | string_value | make_def | call_func | basic_type | hash_symbol | special_form | object_field
 
-special_form ::= loop_block | setq_block | let_block | base_function_form
+special_form ::= loop_block | setq_block | let_block | base_function_form | defvar_block | getf_block | list_block
+               | push_block | dolist_block
 
 base_function_form ::= LP SPACE* base_function SPACE* arg* SPACE* RP
 
 //loop definition
 
-loop_block ::= LP SPACE* LOOP SPACE* loop_for_block* SPACE* do_block? SPACE* RP
+loop_block ::= LP SPACE* LOOP SPACE* loop_for_block* SPACE* do_block? SPACE* collect_block? SPACE* RP
 
 loop_for_block ::= FOR var SPACE* (loop_for_in_block | loop_for_from_block)
 
 loop_for_in_block ::= IN SPACE* arg
 
-loop_for_from_block ::= (FROM SPACE* number SPACE* TO SPACE* number) |
-                        (DOWNFROM SPACE* number SPACE* TO SPACE* number) |
-                        (FROM SPACE* number SPACE* DOWNTO number) |
-                        (UPTO SPACE* number)
+loop_for_from_block ::= (FROM SPACE* int_val SPACE* TO SPACE* int_val) |
+                        (DOWNFROM SPACE* int_val SPACE* TO SPACE* int_val) |
+                        (FROM SPACE* int_val SPACE* DOWNTO int_val) |
+                        (UPTO SPACE* int_val)
 
-do_block ::= DO ((LP SPACE* block_body SPACE* RP ) | block_body )
+int_val ::= number | symbol
+do_block ::= DO SPACE* form_body+
+
+collect_block ::= COLLECT SPACE* (form_body | arg)
 
 //setq definition
 
 setq_block ::= LP SPACE* SETQ SPACE* setq_args* SPACE* RP {methods=[getProperties]}
+
+defvar_block ::= LP SPACE* DEFVAR SPACE* setq_args* SPACE* RP {methods=[getProperties]}
 
 setq_args ::= (LP SPACE* var SPACE* arg SPACE* RP) | var SPACE* arg
 
@@ -208,6 +221,20 @@ call_func ::= LP SPACE* func_name SPACE* arg* SPACE* RP {pin=3 methods=wrong_cal
 
 private wrong_call ::= !RP
 
+getf_block ::= LP SPACE* getf SPACE* getf_arg SPACE* getf_var SPACE* RP
+
+getf_var ::= symbol | object_field
+
+getf_arg ::= symbol | object_field | call_func | special_form | list_def
+
+
+list_block ::= LP SPACE* list SPACE* arg* SPACE* RP
+
+push_block ::= LP SPACE* push SPACE* symbol SPACE* arg SPACE* RP
+
+dolist_block ::= LP SPACE* dolist SPACE* dolist_arg SPACE* block_body SPACE* RP
+
+dolist_arg ::= LP SPACE* var SPACE* arg SPACE* RP
 
 /**
 ************************************************************************************************************************

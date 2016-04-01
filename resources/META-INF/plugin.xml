@@ -35,6 +35,13 @@
     <annotator language="Lisp" implementationClass="com.kgb.lisp.annotators.LispPropertyAnnotator" />
     <!-- Settings pages -->
     <colorSettingsPage implementation="com.kgb.lisp.settings.LispColorSettingsPage" />
+
+    <!-- line markers -->
+    <codeInsight.lineMarkerProvider language="Lisp" implementationClass="com.kgb.lisp.linemarkers.LineMarkerProvider" />
+
+    <!-- Completion contributor -->
+    <completion.contributor language="Lisp" implementationClass="com.kgb.lisp.completion.LispCompletionContributor" />
+    <completion.contributor language="Lisp" implementationClass="com.kgb.lisp.completion.LispMakeCompletionContributor" />
   </extensions>
 
   <actions>

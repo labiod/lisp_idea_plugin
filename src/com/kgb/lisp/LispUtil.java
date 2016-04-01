@@ -7,6 +7,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.search.FileTypeIndex;
 import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.indexing.FileBasedIndex;
 import com.kgb.lisp.psi.*;
@@ -21,8 +22,8 @@ import java.util.List;
  * Class com.kgb.lisp.LispUtil
  */
 public class LispUtil {
-    public static List<LispDefFun> findDefFunctions(Project project, String key) {
-        List<LispDefFun> result = null;
+    public static List<LispDefunBlock> findDefFunctions(Project project, String key) {
+        List<LispDefunBlock> result = null;
         Collection<VirtualFile> virtualFiles = FileBasedIndex.getInstance().getContainingFiles(FileTypeIndex.NAME,
                 LispFileType.INSTANCE, GlobalSearchScope.allScope(project));
         for(VirtualFile virtualFile : virtualFiles) {
@@ -31,12 +32,12 @@ public class LispUtil {
                 LispBlockBody[] defFunctions = PsiTreeUtil.getChildrenOfType(lispFile, LispBlockBody.class);
                 if(defFunctions != null) {
                     for(LispBlockBody block : defFunctions) {
-                        ASTNode node = block.getNode().findChildByType(LispTypes.DEF_FUN);
+                        ASTNode node = block.getNode().findChildByType(LispTypes.DEFUN_BLOCK);
                         if(node != null) {
-                            LispDefFun item = (LispDefFun) node.getPsi();
+                            LispDefunBlock item = (LispDefunBlock) node.getPsi();
                             if (key.equals(item.getFunctionName())) {
                                 if (result == null) {
-                                    result = new ArrayList<LispDefFun>();
+                                    result = new ArrayList<LispDefunBlock>();
                                 }
                                 result.add(item);
                             }
@@ -45,11 +46,11 @@ public class LispUtil {
                 }
             }
         }
-        return result != null ? result : Collections.<LispDefFun>emptyList();
+        return result != null ? result : Collections.<LispDefunBlock>emptyList();
     }
 
-    public static List<LispDefFun> findDefFunctions(Project project) {
-        List<LispDefFun> result = new ArrayList<LispDefFun>();
+    public static List<LispDefunBlock> findDefFunctions(Project project) {
+        List<LispDefunBlock> result = new ArrayList<LispDefunBlock>();
         Collection<VirtualFile> virtualFiles = FileBasedIndex.getInstance().getContainingFiles(FileTypeIndex.NAME, LispFileType.INSTANCE,
                 GlobalSearchScope.allScope(project));
         for(VirtualFile virtualFile : virtualFiles) {
@@ -58,9 +59,9 @@ public class LispUtil {
                 LispBlockBody[] defFunctions = PsiTreeUtil.getChildrenOfType(lispFile, LispBlockBody.class);
                 if(defFunctions != null) {
                     for(LispBlockBody block : defFunctions) {
-                        ASTNode node = block.getNode().findChildByType(LispTypes.DEF_FUN);
+                        ASTNode node = block.getNode().findChildByType(LispTypes.DEFUN_BLOCK);
                         if(node != null) {
-                            LispDefFun item = (LispDefFun) node.getPsi();
+                            LispDefunBlock item = (LispDefunBlock) node.getPsi();
                             result.add(item);
                         }
                     }
@@ -147,6 +148,7 @@ public class LispUtil {
     public static List<String> getBaseMethodName() {
         List<String> baseMethod = new ArrayList<String>();
         baseMethod.add("defun");
+        baseMethod.add("defvar");
         baseMethod.add("defstruct");
         baseMethod.add("if");
         baseMethod.add("car");
@@ -155,8 +157,11 @@ public class LispUtil {
         baseMethod.add("cons");
         baseMethod.add("setq");
         baseMethod.add("write");
+        baseMethod.add("read");
         baseMethod.add("print");
         baseMethod.add("let");
+        baseMethod.add("getf");
+        baseMethod.add("list");
         baseMethod.add(">");
         baseMethod.add("<");
         baseMethod.add("+");
@@ -170,9 +175,9 @@ public class LispUtil {
         PsiElement parent = element;
         while(parent != null ) {
             parent = parent.getParent();
-            if(parent instanceof LispDefFun) {
-                List<LispDefVar> vars = ((LispDefFun) parent).getDefVarList();
-                for(LispDefVar var : vars) {
+            if(parent instanceof LispDefunBlock) {
+                List<LispDefunVar> vars = ((LispDefunBlock) parent).getDefunVarList();
+                for(LispDefunVar var : vars) {
                     if (property.equals(var.getText())) {
                         return true;
                     }
@@ -220,12 +225,39 @@ public class LispUtil {
 
     public static List<String> getMakeOption(Project project) {
         List<String> result = new ArrayList<String>();
-        result.add("make-array");
-        result.add("make-hash-table");
-        result.add("make-list");
+        List<String> types = LispLangManager.getInstance().getAllTypeName();
+        for(String type : types) {
+            result.add("make-"+type);
+        }
         List<LispDefStructure> defStructures = findDefStructures(project);
         for(LispDefStructure defStructure : defStructures) {
-            result.add("make-" + defStructure.getStructNameAndOptions().getStructName().getText());
+            String makeType = "make-" + defStructure.getStructNameAndOptions().getStructName().getText();
+            if(!result.contains(makeType)) {
+                result.add(makeType);
+                LispLangManager.getInstance().addType(defStructure.getStructNameAndOptions().getStructName().getText());
+            }
+
+        }
+        return result;
+    }
+
+    public static PsiElement getElementFromIndex(IElementType tokenType, LispFile file) {
+        List<PsiElement> elements = findAllElementByType(tokenType, file);
+        for (PsiElement element : elements) {
+            if(element.getNode().getElementType().getIndex() == tokenType.getIndex()) {
+                return element;
+            }
+        }
+        return null;
+    }
+
+    private static List<PsiElement> findAllElementByType(IElementType tokenType, LispFile file) {
+        Collection<PsiElement> elements = PsiTreeUtil.findChildrenOfType(file, PsiElement.class);
+        List<PsiElement> result = new ArrayList<PsiElement>();
+        for(PsiElement element : elements) {
+            if(element.getNode().getElementType().equals(tokenType)) {
+                result.add(element);
+            }
         }
         return result;
     }

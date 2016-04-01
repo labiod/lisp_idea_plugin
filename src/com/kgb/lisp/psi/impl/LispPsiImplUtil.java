@@ -14,13 +14,13 @@ import java.util.List;
  */
 public class LispPsiImplUtil {
 
-    public static String getFunctionName(LispDefFun element) {
+    public static String getFunctionName(LispDefunBlock element) {
         LispFuncName functionName = element.getFuncName();
         return functionName.getText().replaceAll("\\\\ ", " ");
     }
 
-    public static int getArgumentCount(LispDefFun element) {
-        return element.getDefVarList().size();
+    public static int getArgumentCount(LispDefunBlock element) {
+        return element.getDefunVarList().size();
     }
 
     public static List<String> getProperties(LispSetqBlock element) {

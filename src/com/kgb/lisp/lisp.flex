@@ -28,7 +28,7 @@ NUMBER=[0-9]+(\.[0-9]*)?
 STRING=(\"([^\"\\]|\\.)*\")
 TRUE=true|t
 FALSE=false|f
-HASH_STRING=\*[a-zA-Z][a-zA-Z_\-0-9]*\*
+HASH_SYMBOL=\*[a-zA-Z][a-zA-Z_\-0-9]*\*
 MAKE=make-[a-zA-Z][a-zA-Z_\-0-9]*
 SYMBOL=[a-zA-Z][a-zA-Z_\-0-9]*
 OBJECT_FIELD=\:[a-zA-Z][a-zA-Z_\-0-9]*
@@ -62,12 +62,19 @@ OBJECT_FIELD=\:[a-zA-Z][a-zA-Z_\-0-9]*
   "collect"                { return COLLECT; }
   "defun"                  { return DEFUN; }
   "defstruct"              { return DEFSTRUCT; }
+  "defvar"                 { return DEFVAR; }
   "let"                    { return LET; }
   "if"                     { return IF; }
   "car"                    { return CAR; }
   "cdr"                    { return CDR; }
   "setq"                   { return SETQ; }
   "cons"                   { return CONS; }
+  "read"                   { return READ; }
+  "list"                   { return LIST; }
+  "getf"                   { return GETF; }
+  "push"                   { return PUSH; }
+  "dolist"                 { return DOLIST; }
+  "format"                 { return FORMAT; }
   ":conc-name"             { return CONC_NAME_KEY; }
   ":copier"                { return COPIER_KEY; }
   ":constructor"           { return CONSTRUCTOR_KEY; }
@@ -101,7 +108,7 @@ OBJECT_FIELD=\:[a-zA-Z][a-zA-Z_\-0-9]*
   {STRING}                 { return STRING; }
   {TRUE}                   { return TRUE; }
   {FALSE}                  { return FALSE; }
-  {HASH_STRING}            { return HASH_STRING; }
+  {HASH_SYMBOL}            { return HASH_SYMBOL; }
   {MAKE}                   { return MAKE; }
   {SYMBOL}                 { return SYMBOL; }
   {OBJECT_FIELD}           { return OBJECT_FIELD; }

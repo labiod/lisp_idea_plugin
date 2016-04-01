@@ -52,7 +52,7 @@ public class LispMakeCompletionContributor extends CompletionContributor {
                                     break;
                                 }
                                 if(node.getPsi() instanceof LispBlockBody) {
-                                    parent = ((LispBlockBody) parent).getMakeDef();
+                                    parent = ((LispBlockBody) node.getPsi()).getMakeDef();
                                     if(parent != null) {
                                         break;
                                     }

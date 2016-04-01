@@ -28,8 +28,8 @@ public class LispCompletionContributor extends CompletionContributor {
                             for(String method : baseMethods) {
                                 resultSet.addElement(LookupElementBuilder.create(method));
                             }
-                            List<LispDefFun> defFunctions = LispUtil.findDefFunctions(completionParameters.getEditor().getProject());
-                            for(LispDefFun fun : defFunctions) {
+                            List<LispDefunBlock> defFunctions = LispUtil.findDefFunctions(completionParameters.getEditor().getProject());
+                            for(LispDefunBlock fun : defFunctions) {
                                 resultSet.addElement(LookupElementBuilder.create(fun.getFuncName().getText()));
                             }
                         } else if(parent instanceof LispVar) {

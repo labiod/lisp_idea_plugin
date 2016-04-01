@@ -8,11 +8,9 @@ import com.intellij.openapi.editor.DefaultLanguageHighlighterColors;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiExpression;
-import com.intellij.psi.PsiLiteralExpression;
 import com.kgb.lisp.LispUtil;
 import com.kgb.lisp.psi.LispCallFunc;
-import com.kgb.lisp.psi.LispDefFun;
+import com.kgb.lisp.psi.LispDefunBlock;
 import com.kgb.lisp.psi.LispFuncName;
 import com.kgb.lisp.psi.LispTypes;
 import org.jetbrains.annotations.NotNull;
@@ -34,10 +32,10 @@ public class LispDefFunAnnotator implements Annotator {
                 return;
             }
             String key = funNameElement.getText();
-            List<LispDefFun> defFunItemList = LispUtil.findDefFunctions(project, key);
+            List<LispDefunBlock> defFunItemList = LispUtil.findDefFunctions(project, key);
             LispFuncName funcName = ((LispCallFunc) element).getFuncName();
             if (defFunItemList.size() == 1) {
-                LispDefFun functionDef = defFunItemList.get(0);
+                LispDefunBlock functionDef = defFunItemList.get(0);
                 int argCount = ((LispCallFunc)element).getArgList().size();
                 if(argCount == functionDef.getArgumentCount()) {
                     TextRange range = new TextRange(funcName.getTextRange().getStartOffset(),
