@@ -49,6 +49,7 @@
 
         //keywords block
         QV="'"
+        QV2='"'
         LOOP="loop"
         FOR="for"
         IN="in"
@@ -74,6 +75,7 @@
         push="push"
         dolist="dolist"
         format="format"
+        load="load"
         MAKE="regexp:make-[a-zA-Z][a-zA-Z_\-0-9]*"
 
         //keywords block end
@@ -111,12 +113,13 @@ root ::= root_item *
 
 private root_item ::= !<<eof>> block_body
 
-block_body ::= defun_block | special_form | call_func | empty_block | if_form | def_structure | make_def | hash_symbol | symbol
+block_body ::= defun_block | special_form | call_func | empty_block | if_form | def_structure | make_def
+            | symbol | basic_type
 
 //**************************************************************************
 //base structure and function definition
 
-basic_type ::= number | string | boolean_value | NULL | string_value | list_def
+basic_type ::= number | string | boolean_value | NULL | string_value | list_def | hash_symbol
 
 string_value ::= QV string_arg
 
@@ -134,7 +137,7 @@ operation ::=  OP_1 | OP_2 | OP_3 | OP_4 | OP_5 | OP_6 | OP_7
 
 var ::= symbol | hash_symbol
 
-func_name ::= symbol | base_function
+func_name ::= symbol
 
 private lambda_expresion ::= LP LAMBDA SPACE* lambda_list SPACE* declaration* SPACE* documentation? SPACE* lambda_body SPACE* RP
 
@@ -160,7 +163,7 @@ form_body ::= block_body | (LP SPACE* RP)
 arg ::= var | string_value | make_def | call_func | basic_type | hash_symbol | special_form | object_field
 
 special_form ::= loop_block | setq_block | let_block | base_function_form | defvar_block | getf_block | list_block
-               | push_block | dolist_block
+               | push_block | dolist_block | load_block
 
 base_function_form ::= LP SPACE* base_function SPACE* arg* SPACE* RP
 
@@ -235,6 +238,10 @@ push_block ::= LP SPACE* push SPACE* symbol SPACE* arg SPACE* RP
 dolist_block ::= LP SPACE* dolist SPACE* dolist_arg SPACE* block_body SPACE* RP
 
 dolist_arg ::= LP SPACE* var SPACE* arg SPACE* RP
+
+load_block ::= LP SPACE* load SPACE* file_path SPACE* RP
+
+file_path ::= string
 
 /**
 ************************************************************************************************************************

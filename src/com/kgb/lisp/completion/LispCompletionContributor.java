@@ -28,7 +28,7 @@ public class LispCompletionContributor extends CompletionContributor {
                             for(String method : baseMethods) {
                                 resultSet.addElement(LookupElementBuilder.create(method));
                             }
-                            List<LispDefunBlock> defFunctions = LispUtil.findDefFunctions(completionParameters.getEditor().getProject());
+                            List<LispDefunBlock> defFunctions = LispUtil.findDefFunctions((LispFile) completionParameters.getOriginalFile());
                             for(LispDefunBlock fun : defFunctions) {
                                 resultSet.addElement(LookupElementBuilder.create(fun.getFuncName().getText()));
                             }

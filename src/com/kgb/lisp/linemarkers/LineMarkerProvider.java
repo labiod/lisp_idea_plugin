@@ -45,7 +45,7 @@ public class LineMarkerProvider extends RelatedItemLineMarkerProvider {
                 }
             }
             LispFuncName funcName = ((LispCallFunc) element).getFuncName();
-            List<LispDefunBlock> functions = LispUtil.findDefFunctions(element.getProject(), funcName.getText());
+            List<LispDefunBlock> functions = LispUtil.findDefFunctions((LispFile) element.getContainingFile(), funcName.getText());
             if(functions.size() > 0) {
                 NavigationGutterIconBuilder<PsiElement> builder = NavigationGutterIconBuilder
                         .create(LispIcons.FUNCTION_ICON)

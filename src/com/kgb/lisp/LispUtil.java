@@ -4,6 +4,7 @@ import com.intellij.lang.ASTNode;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.search.FileTypeIndex;
 import com.intellij.psi.search.GlobalSearchScope;
@@ -11,6 +12,7 @@ import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.indexing.FileBasedIndex;
 import com.kgb.lisp.psi.*;
+import com.kgb.lisp.psi.impl.LispLoadBlockImpl;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,39 +24,40 @@ import java.util.List;
  * Class com.kgb.lisp.LispUtil
  */
 public class LispUtil {
-    public static List<LispDefunBlock> findDefFunctions(Project project, String key) {
-        List<LispDefunBlock> result = null;
-        Collection<VirtualFile> virtualFiles = FileBasedIndex.getInstance().getContainingFiles(FileTypeIndex.NAME,
-                LispFileType.INSTANCE, GlobalSearchScope.allScope(project));
-        for(VirtualFile virtualFile : virtualFiles) {
-            LispFile lispFile = (LispFile) PsiManager.getInstance(project).findFile(virtualFile);
-            if(lispFile != null) {
-                LispBlockBody[] defFunctions = PsiTreeUtil.getChildrenOfType(lispFile, LispBlockBody.class);
-                if(defFunctions != null) {
-                    for(LispBlockBody block : defFunctions) {
-                        ASTNode node = block.getNode().findChildByType(LispTypes.DEFUN_BLOCK);
-                        if(node != null) {
-                            LispDefunBlock item = (LispDefunBlock) node.getPsi();
-                            if (key.equals(item.getFunctionName())) {
-                                if (result == null) {
-                                    result = new ArrayList<LispDefunBlock>();
-                                }
-                                result.add(item);
+    public static List<LispDefunBlock> findDefFunctions(LispFile lispFile, String key) {
+        List<LispDefunBlock> result = new ArrayList<>();
+        if (lispFile != null) {
+            LispBlockBody[] defFunctions = PsiTreeUtil.getChildrenOfType(lispFile, LispBlockBody.class);
+            if (defFunctions != null) {
+                for (LispBlockBody block : defFunctions) {
+                    ASTNode node = block.getNode().findChildByType(LispTypes.DEFUN_BLOCK);
+                    if (node != null) {
+                        LispDefunBlock item = (LispDefunBlock) node.getPsi();
+                        if (key.equals(item.getFunctionName())) {
+                            if (result == null) {
+                                result = new ArrayList<LispDefunBlock>();
                             }
+                            result.add(item);
                         }
                     }
                 }
             }
         }
-        return result != null ? result : Collections.<LispDefunBlock>emptyList();
+        List<LispLoadBlock> loadBlocks = findAllLoadBlock(lispFile);
+        for(LispLoadBlock loadBlock : loadBlocks) {
+            VirtualFile file = getFileFromPath(lispFile.getProject(), loadBlock.getFilePath().getText().replace("\"", ""));
+            if(file != null) {
+                List<LispDefunBlock> partResult = findDefFunctions((LispFile) PsiManager.getInstance(lispFile.getProject()).findFile(file));
+                if(partResult != null) {
+                    result.addAll(partResult);
+                }
+            }
+        }
+        return result;
     }
 
-    public static List<LispDefunBlock> findDefFunctions(Project project) {
+    public static List<LispDefunBlock> findDefFunctions(LispFile lispFile) {
         List<LispDefunBlock> result = new ArrayList<LispDefunBlock>();
-        Collection<VirtualFile> virtualFiles = FileBasedIndex.getInstance().getContainingFiles(FileTypeIndex.NAME, LispFileType.INSTANCE,
-                GlobalSearchScope.allScope(project));
-        for(VirtualFile virtualFile : virtualFiles) {
-            LispFile lispFile = (LispFile) PsiManager.getInstance(project).findFile(virtualFile);
             if(lispFile != null) {
                 LispBlockBody[] defFunctions = PsiTreeUtil.getChildrenOfType(lispFile, LispBlockBody.class);
                 if(defFunctions != null) {
@@ -66,6 +69,37 @@ public class LispUtil {
                         }
                     }
                 }
+            }
+            List<LispLoadBlock> loadBlocks = findAllLoadBlock(lispFile);
+            for(LispLoadBlock loadBlock : loadBlocks) {
+                VirtualFile file = getFileFromPath(lispFile.getProject(), loadBlock.getFilePath().getText().replace("\"", ""));
+                if(file != null) {
+                    List<LispDefunBlock> partResult = findDefFunctions((LispFile) PsiManager.getInstance(lispFile.getProject()).findFile(file));
+                    result.addAll(partResult);
+                }
+            }
+        return result;
+    }
+
+    private static VirtualFile getFileFromPath(Project project, String filePath) {
+        Collection<VirtualFile> virtualFiles = FileBasedIndex.getInstance().getContainingFiles(FileTypeIndex.NAME, LispFileType.INSTANCE,
+                GlobalSearchScope.allScope(project));
+        System.out.println(filePath);
+        for (VirtualFile file : virtualFiles) {
+            System.out.println(file.getPath());
+            if(file.getPath().equals(filePath)) {
+                return file;
+            }
+        }
+        return null;
+    }
+
+    private static List<LispLoadBlock> findAllLoadBlock(LispFile lispFile) {
+        List<LispLoadBlock> result = new ArrayList<>();
+        LispBlockBody[] blocs = PsiTreeUtil.getChildrenOfType(lispFile, LispBlockBody.class);
+        for(LispBlockBody blockBody : blocs) {
+            if(blockBody.getFirstChild() instanceof LispSpecialForm && blockBody.getFirstChild().getFirstChild() instanceof LispLoadBlock) {
+                result.add((LispLoadBlock) blockBody.getFirstChild().getFirstChild());
             }
         }
         return result;
@@ -150,6 +184,7 @@ public class LispUtil {
         baseMethod.add("defun");
         baseMethod.add("defvar");
         baseMethod.add("defstruct");
+        baseMethod.add("dolist");
         baseMethod.add("if");
         baseMethod.add("car");
         baseMethod.add("cdr");
@@ -162,6 +197,9 @@ public class LispUtil {
         baseMethod.add("let");
         baseMethod.add("getf");
         baseMethod.add("list");
+        baseMethod.add("push");
+        baseMethod.add("load");
+        baseMethod.add("format");
         baseMethod.add(">");
         baseMethod.add("<");
         baseMethod.add("+");
@@ -260,5 +298,11 @@ public class LispUtil {
             }
         }
         return result;
+    }
+
+    public static Collection<VirtualFile> getAllLispFiles(Project project) {
+        Collection<VirtualFile> virtualFiles = FileBasedIndex.getInstance().getContainingFiles(FileTypeIndex.NAME,
+                LispFileType.INSTANCE, GlobalSearchScope.allScope(project));
+        return virtualFiles;
     }
 }

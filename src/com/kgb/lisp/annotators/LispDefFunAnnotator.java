@@ -9,10 +9,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
 import com.kgb.lisp.LispUtil;
-import com.kgb.lisp.psi.LispCallFunc;
-import com.kgb.lisp.psi.LispDefunBlock;
-import com.kgb.lisp.psi.LispFuncName;
-import com.kgb.lisp.psi.LispTypes;
+import com.kgb.lisp.psi.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -32,7 +29,7 @@ public class LispDefFunAnnotator implements Annotator {
                 return;
             }
             String key = funNameElement.getText();
-            List<LispDefunBlock> defFunItemList = LispUtil.findDefFunctions(project, key);
+            List<LispDefunBlock> defFunItemList = LispUtil.findDefFunctions((LispFile) element.getContainingFile(), key);
             LispFuncName funcName = ((LispCallFunc) element).getFuncName();
             if (defFunItemList.size() == 1) {
                 LispDefunBlock functionDef = defFunItemList.get(0);

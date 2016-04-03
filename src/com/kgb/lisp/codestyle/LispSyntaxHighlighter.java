@@ -80,6 +80,7 @@ public class LispSyntaxHighlighter extends SyntaxHighlighterBase {
                 || tokenType.equals(LispTypes.OP_5)  || tokenType.equals(LispTypes.OP_6)
                 || tokenType.equals(LispTypes.OP_7) || tokenType.equals(LispTypes.DEFSTRUCT)
                 || tokenType.equals(LispTypes.DOLIST) || tokenType.equals(LispTypes.FORMAT)
+                || tokenType.equals(LispTypes.PUSH) || tokenType.equals(LispTypes.LOAD)
                 || tokenType.equals(LispTypes.COPIER_KEY) || tokenType.equals(LispTypes.CONC_NAME_KEY)
                 || tokenType.equals(LispTypes.CONSTRUCTOR_KEY) || tokenType.equals(LispTypes.INCLUDE_KEY)
                 || tokenType.equals(LispTypes.PRINT_OBJECT_KEY) || tokenType.equals(LispTypes.PRINT_FUNCTION_KEY)

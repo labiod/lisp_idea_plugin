@@ -50,6 +50,7 @@ OBJECT_FIELD=\:[a-zA-Z][a-zA-Z_\-0-9]*
   ">"                      { return OP_6; }
   "<"                      { return OP_7; }
   "'"                      { return QV; }
+  "\""                     { return QV2; }
   "loop"                   { return LOOP; }
   "for"                    { return FOR; }
   "in"                     { return IN; }
@@ -75,6 +76,7 @@ OBJECT_FIELD=\:[a-zA-Z][a-zA-Z_\-0-9]*
   "push"                   { return PUSH; }
   "dolist"                 { return DOLIST; }
   "format"                 { return FORMAT; }
+  "load"                   { return LOAD; }
   ":conc-name"             { return CONC_NAME_KEY; }
   ":copier"                { return COPIER_KEY; }
   ":constructor"           { return CONSTRUCTOR_KEY; }
