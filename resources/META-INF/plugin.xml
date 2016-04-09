@@ -42,6 +42,9 @@
     <!-- Completion contributor -->
     <completion.contributor language="Lisp" implementationClass="com.kgb.lisp.completion.LispCompletionContributor" />
     <completion.contributor language="Lisp" implementationClass="com.kgb.lisp.completion.LispMakeCompletionContributor" />
+    <completion.contributor language="Lisp" implementationClass="com.kgb.lisp.completion.LispLoadCompletionContributor" />
+
+    <lang.braceMatcher language="Lisp" implementationClass="com.kgb.lisp.LispBraceMatcher" />
   </extensions>
 
   <actions>
