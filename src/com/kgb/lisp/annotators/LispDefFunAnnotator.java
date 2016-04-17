@@ -5,7 +5,6 @@ import com.intellij.lang.annotation.Annotation;
 import com.intellij.lang.annotation.AnnotationHolder;
 import com.intellij.lang.annotation.Annotator;
 import com.intellij.openapi.editor.DefaultLanguageHighlighterColors;
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
 import com.kgb.lisp.LispUtil;
@@ -23,7 +22,6 @@ public class LispDefFunAnnotator implements Annotator {
     public void annotate(@NotNull PsiElement element, @NotNull AnnotationHolder holder) {
         String value = element.getText();
         if (value != null && element instanceof LispCallFunc) {
-            Project project = element.getProject();
             ASTNode funNameElement = element.getNode().findChildByType(LispTypes.FUNC_NAME);
             if(funNameElement == null) {
                 return;

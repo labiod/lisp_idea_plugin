@@ -42,7 +42,7 @@ public class LispPropertyAnnotator implements Annotator {
                             Annotation annotation = holder.createInfoAnnotation(range, null);
                             annotation.setTextAttributes(DefaultLanguageHighlighterColors.PARAMETER);
                         } else if (properties.size() == 0) {
-                            if(!LispUtil.hasPropertyInParent(project, element, key)) {
+                            if(!LispUtil.hasPropertyInParent(element, key)) {
                                 TextRange range = new TextRange(arg.getTextRange().getStartOffset(),
                                         arg.getTextRange().getEndOffset());
                                 holder.createErrorAnnotation(range, "Unresolved property");
@@ -51,8 +51,6 @@ public class LispPropertyAnnotator implements Annotator {
                     }
                 }
             }
-        } else {
-
         }
     }
 }

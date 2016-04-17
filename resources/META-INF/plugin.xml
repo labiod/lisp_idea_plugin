@@ -1,17 +1,44 @@
 <idea-plugin version="2">
-  <id>com.your.company.unique.plugin.id</id>
-  <name>Plugin display name here</name>
-  <version>1.0</version>
-  <vendor email="support@yourcompany.com" url="http://www.yourcompany.com">YourCompany</vendor>
+  <id>com.kgb.lisp.LispConstant.PLUGIN_ID</id>
+  <name>Lisp support plugin</name>
+  <version>0.0.1</version>
+  <vendor email="labiod@wp.pl" url="http://www.yourcompany.com">kgbetlej</vendor>
 
   <description><![CDATA[
-      Enter short description for your plugin here.<br>
-      <em>most HTML tags may be used</em>
+      This plugin is to support your work with Common lisp project
     ]]></description>
 
   <change-notes><![CDATA[
-      Add change notes here.<br>
-      <em>most HTML tags may be used</em>
+      <h3>Version 0.01<h3>
+      <h4>Wake up version</h4>
+      <ul>
+        <li>add base support for keywords:
+          <ul>
+            <li>loop</li>
+            <li>if</li>
+          </ul>
+        </li>
+        <li>Add full support for functions:
+          <ul>
+            <li>make</li>
+            <li>defstruct</li>
+          </ul>
+        </li>
+        <li>Add base support for functions:
+          <ul>
+            <li>load</li>
+            <li>setq</li>
+            <li>defun</li>
+            <li>let</li>
+            <li>getf</li>
+            <li>list</li>
+            <li>dolist</li>
+            <li>push</li>
+          </ul>
+        </li>
+        <li>Add support for functions define by user</li>
+        <li>Add hightlighter for all supported base funtions and keywords</li>
+      </ul>
     ]]>
   </change-notes>
 
@@ -49,6 +76,9 @@
 
   <actions>
     <!-- Add your actions here -->
+    <action id="Lisp_new_file" class="LispNewFileAction" text="Lisp file" description="Create new lisp file" icon="/icons/lisp-icon.png">
+      <add-to-group group-id="NewGroup" anchor="first"/>
+    </action>
   </actions>
 
 </idea-plugin>

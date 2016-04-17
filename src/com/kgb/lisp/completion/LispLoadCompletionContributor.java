@@ -1,7 +1,6 @@
 package com.kgb.lisp.completion;
 
 import com.intellij.codeInsight.completion.*;
-import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
 import com.intellij.lang.ASTNode;
 import com.intellij.openapi.project.Project;
@@ -13,9 +12,7 @@ import com.kgb.lisp.psi.LispLoadBlock;
 import com.kgb.lisp.psi.LispTypes;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 public class LispLoadCompletionContributor extends CompletionContributor {
 
@@ -27,14 +24,14 @@ public class LispLoadCompletionContributor extends CompletionContributor {
                 Project project = completionParameters.getEditor().getProject();
                 if(parent.getPsi() instanceof LispLoadBlock && project != null) {
                     Collection<VirtualFile> files = LispUtil.getAllLispFiles(completionParameters.getEditor().getProject());
-                    for (VirtualFile file : files) {
-                        if(!completionParameters.getOriginalFile().getVirtualFile().getPath().equals(file.getPath())) {
-                            String basePath = project.getBasePath();
-                            String path = file.getPath();
+                    //                            String path = file.getPath().substring(basePath.length() + 1);
+                    files.stream()
+                            .filter(file -> !completionParameters.getOriginalFile().getVirtualFile().getPath().equals(file.getPath()))
+                            .forEach(file -> {
+                        String path = file.getPath();
 //                            String path = file.getPath().substring(basePath.length() + 1);
-                            completionResultSet.addElement(LookupElementBuilder.create(path));
-                        }
-                    }
+                        completionResultSet.addElement(LookupElementBuilder.create(path));
+                    });
                 }
             }
         });
