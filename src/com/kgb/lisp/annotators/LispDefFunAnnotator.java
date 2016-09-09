@@ -1,16 +1,14 @@
 package com.kgb.lisp.annotators;
 
+import com.intellij.lang.ASTNode;
 import com.intellij.lang.annotation.Annotation;
 import com.intellij.lang.annotation.AnnotationHolder;
 import com.intellij.lang.annotation.Annotator;
 import com.intellij.openapi.editor.DefaultLanguageHighlighterColors;
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiExpression;
-import com.intellij.psi.PsiLiteralExpression;
 import com.kgb.lisp.LispUtil;
-import com.kgb.lisp.psi.LispDefFunItem;
+import com.kgb.lisp.psi.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -23,19 +21,31 @@ public class LispDefFunAnnotator implements Annotator {
     @Override
     public void annotate(@NotNull PsiElement element, @NotNull AnnotationHolder holder) {
         String value = element.getText();
-        if (value != null && value.startsWith("(")) {
-            Project project = element.getProject();
-            String[] elems = value.substring(1).trim().split(" ");
-            if(elems.length == 0 || elems[0].length() == 0 || elems[0].equals(")")) {
+        if (value != null && element instanceof LispCallFunc) {
+            ASTNode funNameElement = element.getNode().findChildByType(LispTypes.FUNC_NAME);
+            if(funNameElement == null) {
                 return;
             }
-            String key = elems[0];
-            List<LispDefFunItem> defFunItemList = LispUtil.findDefFunctions(project, key);
+            String key = funNameElement.getText();
+            List<LispDefunBlock> defFunItemList = LispUtil.findDefFunctions((LispFile) element.getContainingFile(), key);
+            LispFuncName funcName = ((LispCallFunc) element).getFuncName();
             if (defFunItemList.size() == 1) {
-                TextRange range = new TextRange(element.getTextRange().getStartOffset() + 7,
-                        element.getTextRange().getStartOffset() + 7);
-                Annotation annotation = holder.createInfoAnnotation(range, null);
-                annotation.setTextAttributes(DefaultLanguageHighlighterColors.LINE_COMMENT);
+                LispDefunBlock functionDef = defFunItemList.get(0);
+                int argCount = ((LispCallFunc)element).getArgList().size();
+                if(argCount == functionDef.getArgumentCount()) {
+                    TextRange range = new TextRange(funcName.getTextRange().getStartOffset(),
+                            funcName.getTextRange().getEndOffset());
+                    Annotation annotation = holder.createInfoAnnotation(range, null);
+                    annotation.setTextAttributes(DefaultLanguageHighlighterColors.FUNCTION_CALL);
+                } else if(argCount < functionDef.getArgumentCount()) {
+                    TextRange range = new TextRange(element.getTextRange().getStartOffset() + 1,
+                            element.getTextRange().getEndOffset());
+                    holder.createErrorAnnotation(range, "To few arguments");
+                } else {
+                    TextRange range = new TextRange(element.getTextRange().getStartOffset() + 1,
+                            element.getTextRange().getEndOffset());
+                    holder.createErrorAnnotation(range, "To many arguments");
+                }
             } else if(defFunItemList.size() == 0){
                 List<String> baseMethod = LispUtil.getBaseMethodName();
                 if(!baseMethod.contains(key)) {

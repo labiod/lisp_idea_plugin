@@ -13,17 +13,31 @@
     tokenTypeClass="com.kgb.lisp.psi.LispElementType"
 
     tokens=[
+
+        //lisp base type
+//        list_type = "list"
+//        vector_type = "vector"
+//        array_type = "array"
+//        string_type = "string"
+//        character_type = "character"
+//        symbol_type = "symbol"
+//        short_float_type = "short-float"
+
         EQ='='
         LP='('
         RP=')'
+        obj_accessor="-"
 
 
         space='regexp:[\s\t]+'
         comment='regexp:;.*'
         number='regexp:\d+(\.\d*)?'
         string="regexp:(\"([^\"\\]|\\.)*\")"
-        TRUE="true"
-        FALSE="false"
+        TRUE="regexp:true|t"
+        FALSE="regexp:false|f"
+        IF_NULL="null"
+        NULL="nil"
+        hash_symbol="regexp:\*[a-zA-Z][a-zA-Z_\-0-9]*\*"
 
         op_1='+'
         op_2='-'
@@ -35,90 +49,310 @@
 
         //keywords block
         QV="'"
-        KEYWORD="regexp:(car)|(cdr)"
+        QV2='"'
         LOOP="loop"
         FOR="for"
         IN="in"
         FROM="from"
+        DOWNFROM="downfrom"
         TO="to"
+        UPTO="upto"
+        DOWNTO="downto"
         DO="do"
         COLLECT="collect"
         DEFUN="defun"
+        DEFSTRUCT="defstruct"
+        DEFVAR="defvar"
         LET="let"
-        IF_NULL="null"
-        NULL="nil"
         IF="if"
         car="car"
         cdr="cdr"
         setq="setq"
         cons="cons"
+        read="read"
+        list="list"
+        getf="getf"
+        push="push"
+        dolist="dolist"
+        format="format"
+        load="load"
+        MAKE="regexp:make-[a-zA-Z][a-zA-Z_\-0-9]*"
+
         //keywords block end
-        PF_NAME="regexp:[a-zA-Z][a-zA-Z_\-0-9]*"
+        symbol="regexp:[a-zA-Z][a-zA-Z_\-0-9]*"
+        object_field="regexp:\:[a-zA-Z][a-zA-Z_\-0-9]*"
+
+        //def_structure syntax definition
+        conc_name_key = ":conc-name"
+        copier_key = ":copier"
+        constructor_key = ":constructor"
+        include_key = ":include"
+        initial_offset_key = ":initial-offset"
+        named_option_key = ":named"
+        predicate_key = ":predicate"
+        print_object_key = ":print-object"
+        print_function_key = ":print-function"
+        type_key = ":type"
+        read_only_key = ":read-only"
+        initial_element_key = ":initial_element"
+        initial_contents_key = ":initial_contents"
+        fill_pointer_key = ":fill_pointer"
+        element_type_key = ":element-type"
+
+        list_keywords_1 = "&optional"
+        list_keywords_2 = "&rest"
+        list_keywords_3 = "&aux"
+        list_keywords_4 = "&key"
+        list_keywords_5 = "&allow-othr-keys"
       ]
 }
 
+
 root ::= root_item *
+//root_item definition
 
 private root_item ::= !<<eof>> block_body
 
-private block_body ::= let_def | def_fun_item | call_func | if_statement | empty_block | loop_block
+block_body ::= defun_block | special_form | call_func | empty_block | if_form | def_structure | make_def
+            | symbol | basic_type
+
+//**************************************************************************
+//base structure and function definition
+
+basic_type ::= number | string | boolean_value | NULL | string_value | list_def | hash_symbol
+
+string_value ::= QV string_arg
+
+string_arg ::= var | boolean_value | number | symbol
+
+boolean_value ::= TRUE | FALSE
+
+list_def ::= QV LP SPACE* string_arg* SPACE* RP
+
+keywords ::= LOOP | FOR | IN | FROM | TO | DO | COLLECT | DEFUN | LET | IF | setq | LAMBDA | DECLARE | DEFSTRUCT | MAKE | DEFVAR
+
+base_function ::= write | print | operation | car | cdr | cons | read | list | getf | format
+
+operation ::=  OP_1 | OP_2 | OP_3 | OP_4 | OP_5 | OP_6 | OP_7
+
+var ::= symbol | hash_symbol
+
+func_name ::= symbol
+
+private lambda_expresion ::= LP LAMBDA SPACE* lambda_list SPACE* declaration* SPACE* documentation? SPACE* lambda_body SPACE* RP
+
+private lambda_body ::= block_body
+
+private lambda_list ::= (LP SPACE* RP) | (LP SPACE* var* SPACE* RP)
+
+//define new function
+defun_block ::= LP SPACE* DEFUN SPACE* func_name SPACE* LP SPACE* defun_var* SPACE* RP SPACE* documentation? SPACE* form_body+ SPACE* RP {methods=[getFunctionName getArgumentCount]}
+
+documentation ::= string
+
+declaration ::= LP SPACE* DECLARE SPACE* declare_body* SPACE* RP
+
+private declare_body ::= (LP SPACE* var SPACE* arg SPACE* RP)
+
+defun_var ::= symbol
 
 empty_block ::= LP SPACE* RP
 
-def_fun_item ::= LP SPACE* DEFUN SPACE* func_name SPACE* LP SPACE* var_def* SPACE* RP SPACE* block_body+ SPACE* RP {methods=[getFunctionName]}
+form_body ::= block_body | (LP SPACE* RP)
 
-call_func ::= LP SPACE* func_name SPACE* func_arg* SPACE* RP
+arg ::= var | string_value | make_def | call_func | basic_type | hash_symbol | special_form | object_field
 
-let_def ::= LP SPACE* LET SPACE* LP SPACE* property_def* SPACE* RP SPACE* block_body SPACE* RP
+special_form ::= loop_block | setq_block | let_block | base_function_form | defvar_block | getf_block | list_block
+               | push_block | dolist_block | load_block
 
-if_statement ::= LP SPACE* IF SPACE* if_condition+ SPACE* if_block? SPACE* else_block? SPACE* RP
+base_function_form ::= LP SPACE* base_function SPACE* arg* SPACE* RP
 
-func_name ::= PF_NAME | CAR | CDR | SETQ | CONS
+//loop definition
 
-loop_block ::= LP SPACE* LOOP SPACE* FOR SPACE* var_def SPACE* from_in_block+ SPACE* SPACE* do_block* SPACE* collect_block* SPACE* RP
+loop_block ::= LP SPACE* LOOP SPACE* loop_for_block* SPACE* do_block? SPACE* collect_block? SPACE* RP
 
-operation_call ::= LP SPACE* operation_type SPACE* op_value SPACE* op_value SPACE* RP
+loop_for_block ::= FOR var SPACE* (loop_for_in_block | loop_for_from_block)
 
-to_string ::= QV (TRUE | FALSE | number | PF_NAME)
+loop_for_in_block ::= IN SPACE* arg
 
-setq_block ::= LP SPACE* setq SPACE* setq_items+ SPACE* RP {methods=[getProperty]}
+loop_for_from_block ::= (FROM SPACE* int_val SPACE* TO SPACE* int_val) |
+                        (DOWNFROM SPACE* int_val SPACE* TO SPACE* int_val) |
+                        (FROM SPACE* int_val SPACE* DOWNTO int_val) |
+                        (UPTO SPACE* int_val)
 
-setq_items ::= (LP SPACE* var_def SPACE* var_value SPACE* )
+int_val ::= number | symbol
+do_block ::= DO SPACE* form_body+
 
-var_def ::= PF_NAME
+collect_block ::= COLLECT SPACE* (form_body | arg)
 
-var_value ::= var_def | call_func | number | string | NULL | TRUE | FALSE | to_string | list
+//setq definition
 
-func_arg ::= var | call_func | list | to_string | operation_call | number | string | NULL
+setq_block ::= LP SPACE* SETQ SPACE* setq_args* SPACE* RP {methods=[getProperties]}
 
-var ::= PF_NAME
+defvar_block ::= LP SPACE* DEFVAR SPACE* setq_args* SPACE* RP {methods=[getProperties]}
 
-private operation_type ::= OP_1 | OP_2 | OP_3 | OP_4 | OP_5 | OP_6 | OP_7
+setq_args ::= (LP SPACE* var SPACE* arg SPACE* RP) | var SPACE* arg
 
-private op_value ::= var | NULL | number | string | call_func | to_string
+//let definition
 
-private list ::= var | (QV LP SPACE* list_item* SPACE* RP)
+let_block ::= (LP SPACE* LET SPACE* LP SPACE* let_var_block* SPACE* RP SPACE* let_body* SPACE* RP)
 
-private from_in_block ::= (IN SPACE* list) | (FROM SPACE* list_item SPACE* TO SPACE* number)
+let_var_block ::= LP SPACE* var SPACE* arg SPACE* RP
 
-private do_block ::= DO block_body
+let_body ::= LP SPACE* block_body* SPACE* RP | block_body
 
-private list_item ::= number | string | var | NULL | to_string
+//if form definition
 
-private collect_block ::= COLLECT SPACE* PF_NAME
+if_form ::= LP SPACE* IF SPACE* conditions* SPACE* if_body SPACE* RP
 
-private property_def ::= LP SPACE* var_def SPACE* property_value SPACE* RP
+if_body ::= (if_block? SPACE* else_block) | (if_block SPACE* else_block?) | (if_block SPACE* else_block)
 
-private property_value ::= (number)|(string)
+conditions ::= (LP SPACE* IF_NULL SPACE* var SPACE* RP) | operation_form | var
+
+if_block ::= LP SPACE* block_body* SPACE* RP | block_body | arg
+
+else_block ::= (LP SPACE* block_body* SPACE* RP) | block_body | arg
+
+//operation definition
+operation_form ::= LP SPACE* operation SPACE* arg SPACE* arg SPACE* RP
 
 
-private if_condition ::= (LP SPACE* if_value+ SPACE* RP) | if_value
+//***************************************************************************
 
-private if_value ::= IF_NULL | operation_call | number | string | PF_NAME | NULL
+//Call function definition
+call_func ::= LP SPACE* func_name SPACE* arg* SPACE* RP {pin=3 methods=wrong_call}
 
-private if_block ::= block_body | NULL | var | (LP SPACE* (NULL|PF_NAME) SPACE* RP)
+private wrong_call ::= !RP
 
-private else_block ::= if_block
+getf_block ::= LP SPACE* getf SPACE* getf_arg SPACE* getf_var SPACE* RP
+
+getf_var ::= symbol | object_field
+
+getf_arg ::= symbol | object_field | call_func | special_form | list_def
+
+
+list_block ::= LP SPACE* list SPACE* arg* SPACE* RP
+
+push_block ::= LP SPACE* push SPACE* symbol SPACE* arg SPACE* RP
+
+dolist_block ::= LP SPACE* dolist SPACE* dolist_arg SPACE* block_body SPACE* RP
+
+dolist_arg ::= LP SPACE* var SPACE* arg SPACE* RP
+
+load_block ::= LP SPACE* load SPACE* file_path SPACE* RP
+
+file_path ::= string
+
+/**
+************************************************************************************************************************
+                                            Full implementation
+************************************************************************************************************************
+ */
+
+/**
+*****************************************DEFSTRUCT full implementation**************************************************
+*/
+
+def_structure ::= LP SPACE* DEFSTRUCT SPACE* struct_name_and_options SPACE* documentation? SPACE* slot_description* SPACE* RP
+
+struct_name_and_options ::= struct_name | (LP SPACE* struct_name SPACE* struct_option* SPACE* RP )
+
+struct_name ::= symbol
+
+slot_description ::= slot_name | (LP SPACE* slot_name SPACE* (slot_initform SPACE* slot_option*)* SPACE* RP)
+
+private slot_initform ::= arg
+
+slot_name ::= symbol
+
+slot_option ::= (type_key SPACE* type) | read_only_key SPACE* slot_read_only
+
+private slot_read_only ::= TRUE | FALSE | NULL
+
+struct_option ::= conc_name_option | constructor_option+ | copier_option | include_option | initial_offset_option
+                | named_option | predicate_option | printer_option | type_option
+
+private type_option ::= LP SPACE* type_key SPACE* type SPACE* RP
+
+private type ::= symbol
+
+private printer_option ::= print_object_option | print_function_option
+
+private print_object_option ::= (LP SPACE* print_object_key SPACE* printer_name SPACE RP) | (LP SPACE* print_object_key SPACE* RP)
+
+private printer_name ::= symbol | lambda_expresion
+
+private print_function_option ::= (LP SPACE* print_function_key SPACE* printer_name SPACE RP) | (LP SPACE* print_function_key SPACE* RP)
+
+private predicate_option ::= predicate_key | (LP SPACE* predicate_key SPACE* predicate_name SPACE* RP)
+
+private predicate_name ::= symbol
+
+private named_option ::= named_option_key
+
+private initial_offset_option ::= LP SPACE* initial_offset_key SPACE* initial_offest SPACE* RP
+
+private initial_offest ::= number
+
+private include_option ::= LP SPACE* include_key SPACE* include_structure_name SPACE* slot_description* SPACE* RP
+
+private include_structure_name ::= symbol
+
+private conc_name_option ::= conc_name_key | (LP SPACE* conc_name_key SPACE* RP) | (LP SPACE* conc_name_key SPACE* conc_name_value SPACE*RP)
+
+private conc_name_value ::= symbol
+
+private constructor_option ::= constructor_key | (LP SPACE* constructor_key SPACE* RP)
+                            | (LP SPACE* constructor_key SPACE* constructor_name SPACE* RP)
+                            | (LP SPACE* constructor_key SPACE* constructor_name SPACE* constructor_arglist SPACE* RP)
+
+private constructor_arglist ::= boa_lambda_list
+
+private boa_lambda_list ::= LP SPACE* lambda_list_keyword? SPACE* lambda_field SPACE* RP
+
+private lambda_field ::= slot_name | (LP SPACE* slot_name SPACE* field_value? SPACE* RP)
+
+private field_value ::= base_function | symbol | string_value | call_func
+
+private lambda_list_keyword ::= list_keywords_1 | list_keywords_2 | list_keywords_3 | list_keywords_4 | list_keywords_5
+
+private constructor_name ::= symbol
+
+private copier_option ::= copier_key | (LP SPACE* copier SPACE* copier_name? SPACE* RP)
+
+private copier_name ::= symbol
+
+/**
+**********************************FULL implementation of make-* keyword*************************************************
+ */
+
+make_def ::= LP SPACE* make_variant SPACE* make_values* SPACE* make_option* SPACE* RP {pin=3}
+
+make_variant ::= MAKE
+
+private make_option ::= element_type | initial_element | fill_pointer | initial_contents
+
+private initial_contents ::= initial_contents_key SPACE* object
+
+private fill_pointer ::= fill_pointer_key SPACE*
+
+private initial_element ::= initial_element_key SPACE* initial_element_value
+
+private initial_element_value ::= arg
+private element_type ::= element_type_key SPACE* type
+
+make_values ::=  (object_field SPACE* arg) | arg
+
+
+
+
+
+
+
+
+
+
+
 
 
 
