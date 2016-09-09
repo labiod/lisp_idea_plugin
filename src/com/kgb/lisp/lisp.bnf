@@ -107,7 +107,6 @@
       ]
 }
 
-
 root ::= root_item *
 //root_item definition
 
@@ -145,20 +144,7 @@ private lambda_body ::= block_body
 
 private lambda_list ::= (LP SPACE* RP) | (LP SPACE* var* SPACE* RP)
 
-//define new function
-defun_block ::= LP SPACE* DEFUN SPACE* func_name SPACE* LP SPACE* defun_var* SPACE* RP SPACE* documentation? SPACE* form_body+ SPACE* RP {methods=[getFunctionName getArgumentCount]}
-
-documentation ::= string
-
-declaration ::= LP SPACE* DECLARE SPACE* declare_body* SPACE* RP
-
-private declare_body ::= (LP SPACE* var SPACE* arg SPACE* RP)
-
-defun_var ::= symbol
-
 empty_block ::= LP SPACE* RP
-
-form_body ::= block_body | (LP SPACE* RP)
 
 arg ::= var | string_value | make_def | call_func | basic_type | hash_symbol | special_form | object_field
 
@@ -248,6 +234,23 @@ file_path ::= string
                                             Full implementation
 ************************************************************************************************************************
  */
+
+/**
+*****************************************DEFUN full implementation**************************************************
+ */
+
+defun_block ::= LP SPACE* DEFUN SPACE* func_name SPACE* LP SPACE* defun_var* SPACE* RP SPACE* documentation? SPACE* form_body+ SPACE* RP
+    {methods=[getFunctionName getArgumentCount]}
+
+documentation ::= string
+
+declaration ::= LP SPACE* DECLARE SPACE* declare_body* SPACE* RP
+
+private declare_body ::= (LP SPACE* var SPACE* arg SPACE* RP)
+
+defun_var ::= symbol
+
+form_body ::= block_body | (LP SPACE* RP)
 
 /**
 *****************************************DEFSTRUCT full implementation**************************************************

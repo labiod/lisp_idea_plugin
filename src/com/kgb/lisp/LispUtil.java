@@ -269,7 +269,6 @@ public class LispUtil {
             String makeType = "make-" + defStructure.getStructNameAndOptions().getStructName().getText();
             if(!result.contains(makeType)) {
                 result.add(makeType);
-                LispLangManager.getInstance().addType(defStructure.getStructNameAndOptions().getStructName().getText());
             }
 
         }

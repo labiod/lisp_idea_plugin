@@ -1,5 +1,5 @@
 <idea-plugin version="2">
-  <id>com.kgb.lisp.LispConstant.PLUGIN_ID</id>
+  <id>com.kgb.plugin.lisp</id>
   <name>Lisp support plugin</name>
   <version>0.0.1</version>
   <vendor email="labiod@wp.pl" url="http://www.yourcompany.com">kgbetlej</vendor>

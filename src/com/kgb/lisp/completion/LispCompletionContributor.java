@@ -7,6 +7,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.util.ProcessingContext;
 import com.kgb.lisp.LispLanguage;
 import com.kgb.lisp.LispUtil;
+import com.kgb.lisp.icons.LispIcons;
 import com.kgb.lisp.psi.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -26,16 +27,16 @@ public class LispCompletionContributor extends CompletionContributor {
                         if(parent instanceof LispFuncName) {
                             List<String> baseMethods = LispUtil.getBaseMethodName();
                             for(String method : baseMethods) {
-                                resultSet.addElement(LookupElementBuilder.create(method));
+                                resultSet.addElement(LookupElementBuilder.create(method).withIcon(LispIcons.BASE_FUNCTION_ICON));
                             }
                             List<LispDefunBlock> defFunctions = LispUtil.findDefFunctions((LispFile) completionParameters.getOriginalFile());
                             for(LispDefunBlock fun : defFunctions) {
-                                resultSet.addElement(LookupElementBuilder.create(fun.getFuncName().getText()));
+                                resultSet.addElement(LookupElementBuilder.create(fun.getFuncName().getText()).withIcon(LispIcons.FUNCTION_ICON));
                             }
                         } else if(parent instanceof LispVar) {
                             List<String> vars = LispUtil.getAllProperty(completionParameters.getEditor().getProject());
                             for(String var : vars) {
-                                resultSet.addElement(LookupElementBuilder.create(var));
+                                resultSet.addElement(LookupElementBuilder.create(var).withIcon(LispIcons.PROPERTY_ICON));
                             }
                         } else {
                             resultSet.addElement(LookupElementBuilder.create("something"));
