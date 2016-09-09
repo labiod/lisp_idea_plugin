@@ -1,4 +1,5 @@
-package com.kgb.lisp.lexer;
+package com.kgb.lexer.lisp;
+
 import com.intellij.lexer.*;
 import com.intellij.psi.tree.IElementType;
 import static com.kgb.lisp.psi.LispTypes.*;
@@ -18,9 +19,8 @@ import static com.kgb.lisp.psi.LispTypes.*;
 %type IElementType
 %unicode
 
-EOL="\r"|"\n"|"\r\n"
-LINE_WS=[\ \t\f]
-WHITE_SPACE=({LINE_WS}|{EOL})+
+EOL=\R
+WHITE_SPACE=\s
 
 SPACE=[\s\t]+
 COMMENT=;.*
@@ -40,10 +40,11 @@ OBJECT_FIELD=\:[a-zA-Z][a-zA-Z_\-0-9]*
   "="                      { return EQ; }
   "("                      { return LP; }
   ")"                      { return RP; }
-  "-"                      { return OP_2; }
+  "-"                      { return OBJ_ACCESSOR; }
   "null"                   { return IF_NULL; }
   "nil"                    { return NULL; }
   "+"                      { return OP_1; }
+  "-"                      { return OP_2; }
   "*"                      { return OP_3; }
   "/"                      { return OP_4; }
   "!"                      { return OP_5; }
@@ -115,5 +116,6 @@ OBJECT_FIELD=\:[a-zA-Z][a-zA-Z_\-0-9]*
   {SYMBOL}                 { return SYMBOL; }
   {OBJECT_FIELD}           { return OBJECT_FIELD; }
 
-  [^] { return com.intellij.psi.TokenType.BAD_CHARACTER; }
 }
+
+[^] { return com.intellij.psi.TokenType.BAD_CHARACTER; }

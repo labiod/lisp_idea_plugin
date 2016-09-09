@@ -29,7 +29,7 @@ public class LispColorSettingsPage implements ColorSettingsPage {
     @Nullable
     @Override
     public Icon getIcon() {
-        return LispIcons.ICON;
+        return LispIcons.FILE_ICON;
     }
 
     @NotNull

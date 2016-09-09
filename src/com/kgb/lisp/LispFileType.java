@@ -39,6 +39,6 @@ public class LispFileType extends LanguageFileType {
     @Nullable
     @Override
     public Icon getIcon() {
-        return LispIcons.ICON;
+        return LispIcons.FILE_ICON;
     }
 }

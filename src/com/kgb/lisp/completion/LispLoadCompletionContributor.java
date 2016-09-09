@@ -8,6 +8,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.patterns.PlatformPatterns;
 import com.intellij.util.ProcessingContext;
 import com.kgb.lisp.LispUtil;
+import com.kgb.lisp.icons.LispIcons;
 import com.kgb.lisp.psi.LispLoadBlock;
 import com.kgb.lisp.psi.LispTypes;
 import org.jetbrains.annotations.NotNull;
@@ -30,7 +31,7 @@ public class LispLoadCompletionContributor extends CompletionContributor {
                             .forEach(file -> {
                         String path = file.getPath();
 //                            String path = file.getPath().substring(basePath.length() + 1);
-                        completionResultSet.addElement(LookupElementBuilder.create(path));
+                        completionResultSet.addElement(LookupElementBuilder.create(path).withIcon(LispIcons.FILE_ICON));
                     });
                 }
             }
