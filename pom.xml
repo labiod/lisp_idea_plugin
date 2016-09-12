@@ -127,6 +127,7 @@
                                 <path id="sourcepath">
                                     <dirset dir="${project.basedir}">
                                         <include name="src"/>
+                                        <include name="gen"/>
                                     </dirset>
                                 </path>
                                 <instrumentIdeaExtensions destdir="${project.build.outputDirectory}"
