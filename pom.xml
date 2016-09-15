@@ -47,8 +47,9 @@
                 <filtering>true</filtering>
             </resource>
         </resources>
-        <finalName>Mathematica-IntelliJ-Plugin</finalName>
+        <finalName>Lisp-IntelliJ-Plugin</finalName>
         <sourceDirectory>src/</sourceDirectory>
+        <sourceDirectory>gen/</sourceDirectory>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -127,7 +128,6 @@
                                 <path id="sourcepath">
                                     <dirset dir="${project.basedir}">
                                         <include name="src"/>
-                                        <include name="gen"/>
                                     </dirset>
                                 </path>
                                 <instrumentIdeaExtensions destdir="${project.build.outputDirectory}"
