@@ -31,7 +31,7 @@ public class LispUtil {
                     ASTNode node = block.getNode().findChildByType(LispTypes.DEFUN_BLOCK);
                     if (node != null) {
                         LispDefunBlock item = (LispDefunBlock) node.getPsi();
-                        if (key.equals(item.getFunctionName())) {
+                        if (key.equals(item.getFuncName())) {
                             result.add(item);
                         }
                     }
@@ -157,9 +157,9 @@ public class LispUtil {
                         if(block.getSpecialForm() != null) {
                             LispSetqBlock item = block.getSpecialForm().getSetqBlock();
                             if(item != null) {
-                                List<String> properties = item.getProperties();
-                                for(String property : properties) {
-                                    if (key.equals(property)) {
+                                List<LispSetqArgs> properties = item.getSetqArgsList();
+                                for(LispSetqArgs property : properties) {
+                                    if (key.equals(property.getText())) {
                                         if (result == null) {
                                             result = new ArrayList<>();
                                         }
@@ -242,12 +242,12 @@ public class LispUtil {
                         if(block.getSpecialForm() != null) {
                             LispSetqBlock item = block.getSpecialForm().getSetqBlock();
                             if(item != null) {
-                                List<String> properties = item.getProperties();
-                                for(String property : properties) {
+                                List<LispSetqArgs> properties = item.getSetqArgsList();
+                                for(LispSetqArgs property : properties) {
                                     if (result == null) {
                                         result = new ArrayList<>();
                                     }
-                                    result.add(property);
+                                    result.add(property.getArg().getStringValue().getText());
                                 }
                             }
                         }

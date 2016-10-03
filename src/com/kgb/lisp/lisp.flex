@@ -1,4 +1,4 @@
-package com.kgb.lexer.lisp;
+package com.kgb.lisp.lexer;
 
 import com.intellij.lexer.*;
 import com.intellij.psi.tree.IElementType;
@@ -40,7 +40,6 @@ OBJECT_FIELD=\:[a-zA-Z][a-zA-Z_\-0-9]*
   "="                      { return EQ; }
   "("                      { return LP; }
   ")"                      { return RP; }
-  "-"                      { return OBJ_ACCESSOR; }
   "null"                   { return IF_NULL; }
   "nil"                    { return NULL; }
   "+"                      { return OP_1; }

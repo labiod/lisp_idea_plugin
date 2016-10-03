@@ -32,12 +32,12 @@ public class LispDefFunAnnotator implements Annotator {
             if (defFunItemList.size() == 1) {
                 LispDefunBlock functionDef = defFunItemList.get(0);
                 int argCount = ((LispCallFunc)element).getArgList().size();
-                if(argCount == functionDef.getArgumentCount()) {
+                if(argCount == functionDef.getDefunVarList().size()) {
                     TextRange range = new TextRange(funcName.getTextRange().getStartOffset(),
                             funcName.getTextRange().getEndOffset());
                     Annotation annotation = holder.createInfoAnnotation(range, null);
                     annotation.setTextAttributes(DefaultLanguageHighlighterColors.FUNCTION_CALL);
-                } else if(argCount < functionDef.getArgumentCount()) {
+                } else if(argCount < functionDef.getDefunVarList().size()) {
                     TextRange range = new TextRange(element.getTextRange().getStartOffset() + 1,
                             element.getTextRange().getEndOffset());
                     holder.createErrorAnnotation(range, "To few arguments");
