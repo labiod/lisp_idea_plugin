@@ -31,7 +31,7 @@ public class LispUtil {
                     ASTNode node = block.getNode().findChildByType(LispTypes.DEFUN_BLOCK);
                     if (node != null) {
                         LispDefunBlock item = (LispDefunBlock) node.getPsi();
-                        if (key.equals(item.getFuncName())) {
+                        if (key.equals(item.getFunctionName())) {
                             result.add(item);
                         }
                     }
