@@ -26,8 +26,6 @@
         EQ='='
         LP='('
         RP=')'
-        obj_accessor="-"
-
 
         space='regexp:[\s\t]+'
         comment='regexp:;.*'
@@ -112,7 +110,7 @@ root ::= root_item *
 
 private root_item ::= !<<eof>> block_body
 
-block_body ::= defun_block | special_form | call_func | empty_block | if_form | def_structure | make_def
+block_body ::= defun_block | special_form | call_func | if_form | def_structure | make_def | empty_block
             | symbol | basic_type
 
 //**************************************************************************
@@ -126,7 +124,9 @@ string_arg ::= var | boolean_value | number | symbol
 
 boolean_value ::= TRUE | FALSE
 
-list_def ::= QV LP SPACE* string_arg* SPACE* RP
+list_def ::= QV* LP SPACE* list_arg* SPACE* RP
+
+list_arg ::= string_arg | NULL | list_def
 
 keywords ::= LOOP | FOR | IN | FROM | TO | DO | COLLECT | DEFUN | LET | IF | setq | LAMBDA | DECLARE | DEFSTRUCT | MAKE | DEFVAR
 
@@ -145,6 +145,7 @@ private lambda_body ::= block_body
 private lambda_list ::= (LP SPACE* RP) | (LP SPACE* var* SPACE* RP)
 
 empty_block ::= LP SPACE* RP
+
 
 arg ::= var | string_value | make_def | call_func | basic_type | hash_symbol | special_form | object_field
 
@@ -189,15 +190,15 @@ let_body ::= LP SPACE* block_body* SPACE* RP | block_body
 
 //if form definition
 
-if_form ::= LP SPACE* IF SPACE* conditions* SPACE* if_body SPACE* RP
+if_form ::= LP SPACE* IF SPACE* conditions* SPACE* then_form SPACE* else_form* RP
 
-if_body ::= (if_block? SPACE* else_block) | (if_block SPACE* else_block?) | (if_block SPACE* else_block)
+conditions ::= (LP SPACE* IF_NULL SPACE* var SPACE* RP) | operation_form | var | var_eqaul
 
-conditions ::= (LP SPACE* IF_NULL SPACE* var SPACE* RP) | operation_form | var
+var_eqaul ::= (LP SPACE* var SPACE* var SPACE* RP)
 
-if_block ::= LP SPACE* block_body* SPACE* RP | block_body | arg
+then_form ::= block_body | arg
 
-else_block ::= (LP SPACE* block_body* SPACE* RP) | block_body | arg
+else_form ::= block_body | arg
 
 //operation definition
 operation_form ::= LP SPACE* operation SPACE* arg SPACE* arg SPACE* RP
@@ -206,7 +207,7 @@ operation_form ::= LP SPACE* operation SPACE* arg SPACE* arg SPACE* RP
 //***************************************************************************
 
 //Call function definition
-call_func ::= LP SPACE* func_name SPACE* arg* SPACE* RP {pin=3 methods=wrong_call}
+call_func ::= LP SPACE* func_name SPACE* arg* SPACE* RP {pin=3 recoverWhile=wrong_call}
 
 private wrong_call ::= !RP
 
@@ -221,7 +222,9 @@ list_block ::= LP SPACE* list SPACE* arg* SPACE* RP
 
 push_block ::= LP SPACE* push SPACE* symbol SPACE* arg SPACE* RP
 
-dolist_block ::= LP SPACE* dolist SPACE* dolist_arg SPACE* block_body SPACE* RP
+dolist_block ::= LP SPACE* dolist SPACE* dolist_arg SPACE* dolist_body* SPACE* RP
+
+dolist_body ::= block_body
 
 dolist_arg ::= LP SPACE* var SPACE* arg SPACE* RP
 
